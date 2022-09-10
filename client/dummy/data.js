@@ -43,3 +43,143 @@ export const data = [
     ],
   },
 ];
+
+export const videos = [
+  {
+    id: 1,
+    title: "스파이더맨 노웨이홈",
+    image:
+      "http://img.cgv.co.kr/Movie/Thumbnail/StillCut/000084/84949/84949197863_727.jpg",
+  },
+  {
+    id: 2,
+    title: "기묘한 이야기",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2-DBmhJWhsVqR7YEcCFQ_Yp-DuwXMGQUEM5tvxfOm&s",
+  },
+  {
+    id: 3,
+    title: "서울대작전",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXcYR-F5IswyPWYROdHok6kjVm0S1j_zEfipCn2sBL&s",
+  },
+  {
+    id: 4,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 5,
+    title: "환혼",
+    image:
+      "https://w.namu.la/s/811161a66f692436e8f5a83c842160d87c41bc5d4edf073f5bfdf9da204e29be989647d2ad49e8ad8dddb43b15fca8e91c3aa28df372101758d5d65dc8c16560fac3b2554cbaf4cfe992304ec7dbd10758707cdf1a901996cce86d220716e115",
+  },
+  {
+    id: 6,
+    title: "슬기로운 감빵생활",
+    image:
+      "https://web-cf-image.cjenm.com/crop/660x950/public/share/metamng/programs/prisonplaybook-drama-poster-ko-001-19.jpg?v=1662031810",
+  },
+  {
+    id: 7,
+    title: "SKY캐슬",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-SQZ00sO6Dr9Fgkgdxt338rycGZAwY3BZIVyDq-6iGg&s",
+  },
+  {
+    id: 8,
+    title: "스물다섯 스물하나",
+    image:
+      "https://w.namu.la/s/706844f68cd19a99165c07a21194ce61241e613d4e8702cc710fed64c6e3c9218da7dc1e03b3601d4fad9b2f256e2bd55a5f4cc943b52389329dfe04af1f901dc20f2617a781228361872a2ed9d757a92e7cf13bfb1799d5591674563a14af7220caeb5f09766e8bcc1a4640a3c61913",
+  },
+  {
+    id: 9,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 10,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+  {
+    id: 11,
+    title: "이상한변호사 우영우",
+    image: "https://image.yes24.com/goods/111735977/XL",
+  },
+];

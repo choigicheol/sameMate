@@ -183,3 +183,9 @@ export const videos = [
     image: "https://image.yes24.com/goods/111735977/XL",
   },
 ];
+
+export const menus = [
+  { id: 1, title: "Home" },
+  { id: 2, title: "Search" },
+  { id: 3, title: "Mypage" },
+];

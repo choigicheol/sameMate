@@ -8,7 +8,7 @@ export default function MenuTap({ title, navigation }) {
       style={styles.container}
       onPress={() => navigation.navigate(title)}
     >
-      <Text>{title}</Text>
+      <Text style={styles.menuText}>{title}</Text>
     </TouchableOpacity>
   );
 }
@@ -18,5 +18,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    height: 50,
   },
+  menuText: { color: "#FFFFFF" },
 });

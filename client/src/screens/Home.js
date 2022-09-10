@@ -12,19 +12,13 @@ import Poster from "../components/Poster";
 import { windowWidth } from "../util/WH";
 
 import MenuTap from "../components/MenuTap";
-import { data } from "../../dummy/data";
+import { data, menus } from "../../dummy/data";
 
 export default function Home({ navigation, route }) {
   const [{ id, name, favorite }] = data;
 
-  const menus = [
-    { id: 1, title: "Home" },
-    { id: 2, title: "Search" },
-    { id: 3, title: "Mypage" },
-  ];
-
   return (
-    <View style={styles.container}>
+    <>
       <ScrollView
         keyboardShouldPersistTaps={"handled"}
         style={styles.scrollViewContainer}
@@ -64,18 +58,16 @@ export default function Home({ navigation, route }) {
           <MenuTap key={menu.id} title={menu.title} navigation={navigation} />
         ))}
       </View>
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollViewContainer: {
     flex: 1,
     backgroundColor: "#fff",
   },
-  scrollViewContainer: {
-    flex: 1,
-  },
+
   userNameContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -97,12 +89,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   MenuContainer: {
-    height: 60,
     flexDirection: "row",
-    width: windowWidth,
+    backgroundColor: "#32AAFF",
   },
   favoriteListContainer: {
-    height: "auto",
     minHeight: 150,
   },
 });

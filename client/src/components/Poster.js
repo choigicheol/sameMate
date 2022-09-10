@@ -30,6 +30,7 @@ const styles = StyleSheet.create({
   },
   posterTitle: {
     fontSize: 11,
+    marginTop: 5,
     fontWeight: "bold",
   },
 });

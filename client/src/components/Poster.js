@@ -5,12 +5,16 @@ import { windowWidth } from "../util/WH";
 export default function Poster({ data, isOnlyImg = false }) {
   return (
     <View style={styles.container}>
-      <Image
-        style={styles.posterImage}
-        source={{
-          uri: data.image,
-        }}
-      />
+      {data.image ? (
+        <Image
+          style={styles.posterImage}
+          source={{
+            uri: data.image,
+          }}
+        />
+      ) : (
+        <></>
+      )}
       {isOnlyImg ? <></> : <Text style={styles.posterTitle}>{data.title}</Text>}
     </View>
   );

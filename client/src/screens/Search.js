@@ -5,20 +5,40 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import SearchBar from "../components/SearchBar";
 import { videos, menus } from "../../dummy/data";
 import Poster from "../components/Poster";
 import MenuTap from "../components/MenuTap";
 import { windowWidth } from "../util/WH";
+import axios from "axios";
+import OverFlowText from "../components/OverFlowText";
+import SearchResult from "../components/SearchResult";
+import { CLIENT_ID, CLIENT_KEY } from "react-native-dotenv";
+// import { useQuery } from "@tanstack/react-query";
 
 export default function Search({ navigation }) {
-  const [searchResult, setSearchResult] = useState([]);
+  const [movies, setMovies] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const getVideo = (word) => {
-    if (word) {
-      const result = videos.filter((video) => video.title.includes(word));
-      setSearchResult(result);
+  const getMovies = async (word) => {
+    if (word.length > 1) {
+      setIsSearching(true);
+      const result = await axios.get(
+        `https://openapi.naver.com/v1/search/movie.json?query=${word}&display=100`,
+        {
+          headers: {
+            "X-Naver-Client-Id": CLIENT_ID,
+            "X-Naver-Client-Secret": CLIENT_KEY,
+          },
+        }
+      );
+
+      if (result.data) {
+        setMovies(result.data.items);
+      }
+      setIsSearching(false);
     }
   };
 
@@ -26,32 +46,32 @@ export default function Search({ navigation }) {
     <>
       <View style={styles.container}>
         <View style={styles.marginTB10}>
-          <SearchBar getVideo={getVideo} />
+          <SearchBar getMovies={getMovies} />
         </View>
-
-        <ScrollView
-          horizontal={false}
-          contentContainerStyle={styles.resultContainer}
-        >
-          <View style={styles.resultLengthBox}>
-            <Text
-              style={styles.resultLength}
-            >{`검색 결과 : ${searchResult.length} 개`}</Text>
+        <View style={styles.resultLengthBox}>
+          <Text
+            style={styles.resultLength}
+          >{`검색 결과 : ${movies.length} 개`}</Text>
+        </View>
+        {isSearching ? (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+            }}
+          >
+            <ActivityIndicator size="large" color="tomato" />
           </View>
-          {searchResult.map((result) => (
-            <View style={styles.resultList}>
-              <Poster data={result} key={result.id} isOnlyImg={true} />
-              <View style={styles.resultInfo}>
-                <Text>제목 : 영화 드라마 예능</Text>
-                <Text>개봉일 : 2021. 04. 05</Text>
-                <Text>출연 : 누구누구</Text>
-              </View>
-              <TouchableOpacity style={styles.addButton}>
-                <Text>담기</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-        </ScrollView>
+        ) : (
+          <ScrollView
+            horizontal={false}
+            contentContainerStyle={styles.resultContainer}
+          >
+            {movies.map((movie, idx) => (
+              <SearchResult movie={movie} key={idx} />
+            ))}
+          </ScrollView>
+        )}
       </View>
       <View style={styles.MenuContainer}>
         {menus.map((menu) => (
@@ -78,32 +98,10 @@ const styles = StyleSheet.create({
   resultLengthBox: {
     flexDirection: "row",
     justifyContent: "flex-end",
+    marginRight: 10,
   },
   resultLength: { marginBottom: 10, fontWeight: "bold", color: "#4e4e4e" },
-  resultList: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-    height: 180,
-    borderTopWidth: 1,
-    borderColor: "#4e4e4e",
-    borderStyle: "dashed",
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
-  resultInfo: {
-    height: "100%",
-    justifyContent: "space-between",
-  },
-  addButton: {
-    width: 50,
-    height: 30,
-    borderWidth: 1,
-    borderRadius: 4,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+
   MenuContainer: {
     flexDirection: "row",
     backgroundColor: "#32AAFF",

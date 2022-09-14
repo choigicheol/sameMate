@@ -2,14 +2,15 @@ import React, { useState } from "react";
 import { StyleSheet, View, TextInput, Text } from "react-native";
 import { windowWidth } from "../util/WH";
 
-export default function SearchBar({ getVideo }) {
+export default function SearchBar({ getMovies }) {
   const [searchWord, setSearchWord] = useState("");
+
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.searchTap}
         onChangeText={(text) => setSearchWord(text)}
-        onEndEditing={() => getVideo(searchWord)}
+        onEndEditing={() => getMovies(searchWord)}
         placeholder={"검색어를 입력해주세요"}
       ></TextInput>
     </View>

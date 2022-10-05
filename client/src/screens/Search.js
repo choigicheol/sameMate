@@ -1,26 +1,32 @@
 import React, { useState } from "react";
+import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
+
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
 import SearchBar from "../components/SearchBar";
-import { videos, menus } from "../../dummy/data";
+import { menus } from "../../dummy/data";
 import Poster from "../components/Poster";
 import MenuTap from "../components/MenuTap";
-import { windowWidth } from "../util/WH";
 import axios from "axios";
-import OverFlowText from "../components/OverFlowText";
 import SearchResult from "../components/SearchResult";
 import { CLIENT_ID, CLIENT_KEY } from "react-native-dotenv";
 // import { useQuery } from "@tanstack/react-query";
+import { db } from "../../firebaseConfig";
+import { ref, set, child, push, update } from "firebase/database";
+import { useSelector, useDispatch } from "react-redux";
+import { addMovie, deleteMovie } from "../redux/slice/movieSlice";
 
-export default function Search({ navigation }) {
+export default function Search({ navigation, route }) {
   const [movies, setMovies] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const { userUid } = route.params;
+  const extractTextPattern = /(<([^>]+)>)/gi;
+  const disPatch = useDispatch();
 
   const getMovies = async (word) => {
     if (word.length > 1) {
@@ -42,6 +48,20 @@ export default function Search({ navigation }) {
     }
   };
 
+  const addFavorite = (data) => {
+    // TODO: 영화 개별적으로 유니크한 키가 필요하다. 안그러면 데이터베이스테 동명의 영화가 덮어ㄷ씌워짐
+    const updates = {};
+    const movieTitle = data.title.replace(extractTextPattern, "");
+    const actors = data.actor.slice(0, 8);
+    JSHash(movieTitle + actors, CONSTANTS.HashAlgorithms.sha256).then(
+      (hash) => {
+        updates["/all-movies/" + hash + "/" + userUid] = true;
+        updates["/user-movies/" + userUid + "/" + hash] = data;
+        update(ref(db), updates);
+      }
+    );
+    disPatch(addMovie([data]));
+  };
   return (
     <>
       <View style={styles.container}>
@@ -68,14 +88,19 @@ export default function Search({ navigation }) {
             contentContainerStyle={styles.resultContainer}
           >
             {movies.map((movie, idx) => (
-              <SearchResult movie={movie} key={idx} />
+              <SearchResult movie={movie} key={idx} addFavorite={addFavorite} />
             ))}
           </ScrollView>
         )}
       </View>
       <View style={styles.MenuContainer}>
         {menus.map((menu) => (
-          <MenuTap key={menu.id} title={menu.title} navigation={navigation} />
+          <MenuTap
+            key={menu.id}
+            userUid={userUid}
+            title={menu.title}
+            navigation={navigation}
+          />
         ))}
       </View>
     </>

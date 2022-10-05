@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
 import Poster from "./Poster";
+import { windowWidth } from "../util/WH";
 
-export default function PosterList({ user }) {
-  const [{ name, favorite }] = user;
-
+export default function PosterList({ name, favorites }) {
+  console.log("favorites");
   return (
     <>
       <View
@@ -25,8 +25,10 @@ export default function PosterList({ user }) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.favoriteListContainer}
         >
-          {favorite.length ? (
-            favorite.map((el) => <Poster data={el} key={el.id} />)
+          {favorites.length ? (
+            favorites.map((favorite, idx) => (
+              <Poster data={favorite} key={idx} />
+            ))
           ) : (
             <View
               style={{

@@ -3,6 +3,8 @@ import { StyleSheet, View, Image, Text } from "react-native";
 import { windowWidth } from "../util/WH";
 
 export default function Poster({ data, isOnlyImg = false }) {
+  const extractTextPattern = /(<([^>]+)>)/gi;
+  // console.log(data);
   return (
     <View style={styles.container}>
       {data.image ? (
@@ -13,9 +15,20 @@ export default function Poster({ data, isOnlyImg = false }) {
           }}
         />
       ) : (
-        <></>
+        <Image
+          style={styles.posterImage}
+          source={{
+            uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3D-lTi8YdxLGtoKSdAQXPwmFSnjfZCDNFsQ&usqp=CAU",
+          }}
+        />
       )}
-      {isOnlyImg ? <></> : <Text style={styles.posterTitle}>{data.title}</Text>}
+      {isOnlyImg ? (
+        <></>
+      ) : (
+        <Text style={styles.posterTitle} numberOfLines={2}>
+          {data.title.replace(extractTextPattern, "")}
+        </Text>
+      )}
     </View>
   );
 }
@@ -33,6 +46,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   posterTitle: {
+    // width: "100%",
     fontSize: 11,
     marginTop: 5,
     fontWeight: "bold",

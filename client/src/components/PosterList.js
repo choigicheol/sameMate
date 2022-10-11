@@ -3,8 +3,7 @@ import { View, Text, ScrollView, StyleSheet } from "react-native";
 import Poster from "./Poster";
 import { windowWidth } from "../util/WH";
 
-export default function PosterList({ name, favorites }) {
-  console.log("favorites");
+export default function PosterList({ name, favorites, isOnlyImg }) {
   return (
     <>
       <View
@@ -17,7 +16,7 @@ export default function PosterList({ name, favorites }) {
         }}
       >
         <Text style={styles.userName}>{name}</Text>
-        <Text style={styles.userText}>님의 리스트</Text>
+        {/* <Text style={styles.userText}>님의 리스트</Text> */}
       </View>
       <View style={styles.userContainer}>
         <ScrollView
@@ -27,7 +26,7 @@ export default function PosterList({ name, favorites }) {
         >
           {favorites.length ? (
             favorites.map((favorite, idx) => (
-              <Poster data={favorite} key={idx} />
+              <Poster data={favorite} key={idx} isOnlyImg={isOnlyImg} />
             ))
           ) : (
             <View

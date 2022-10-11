@@ -1,11 +1,17 @@
 import React from "react";
 import { Text } from "react-native";
 
-function OverFlowText({ text, style }) {
+function OverFlowText({ category, text, style }) {
   return (
-    <Text numberOfLines={1} style={style}>
-      {text}
-    </Text>
+    <>
+      {text ? (
+        <Text numberOfLines={1} style={style}>
+          {category + text}
+        </Text>
+      ) : (
+        <></>
+      )}
+    </>
   );
 }
 

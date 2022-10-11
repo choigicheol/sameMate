@@ -10,14 +10,12 @@ import { Provider } from "react-redux";
 const queryClient = new QueryClient();
 
 export default function App() {
-  const [isLogin, setIsLogin] = useState(false);
-
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <View style={styles.statusPadding} />
         <StatusBar />
-        <Navigation isLogin={isLogin} />
+        <Navigation />
       </QueryClientProvider>
     </Provider>
   );

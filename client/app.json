@@ -22,8 +22,10 @@
       "adaptiveIcon": {
         "foregroundImage": "",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.gigichoi.client"
     },
+    "scheme": "myapp",
     "web": {
       "favicon": ""
     }

@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
-
 import {
   View,
   Text,
@@ -10,22 +8,21 @@ import {
 } from "react-native";
 import SearchBar from "../components/SearchBar";
 import { menus } from "../../dummy/data";
-import Poster from "../components/Poster";
 import MenuTap from "../components/MenuTap";
 import axios from "axios";
 import SearchResult from "../components/SearchResult";
 import { CLIENT_ID, CLIENT_KEY } from "react-native-dotenv";
-// import { useQuery } from "@tanstack/react-query";
 import { db } from "../../firebaseConfig";
-import { ref, set, child, push, update } from "firebase/database";
-import { useSelector, useDispatch } from "react-redux";
-import { addMovie, deleteMovie } from "../redux/slice/movieSlice";
+import { ref, update } from "firebase/database";
+import { useDispatch, useSelector } from "react-redux";
+import { addMovie } from "../redux/slice/movieSlice";
+import { JSHash, CONSTANTS } from "react-native-hash";
 
-export default function Search({ navigation, route }) {
+export default function Search({ navigation }) {
   const [movies, setMovies] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const { userUid } = route.params;
   const extractTextPattern = /(<([^>]+)>)/gi;
+  const userUid = useSelector((state) => state.user.uid);
   const disPatch = useDispatch();
 
   const getMovies = async (word) => {
@@ -49,17 +46,16 @@ export default function Search({ navigation, route }) {
   };
 
   const addFavorite = (data) => {
-    // TODO: 영화 개별적으로 유니크한 키가 필요하다. 안그러면 데이터베이스테 동명의 영화가 덮어ㄷ씌워짐
     const updates = {};
     const movieTitle = data.title.replace(extractTextPattern, "");
-    const actors = data.actor.slice(0, 8);
-    JSHash(movieTitle + actors, CONSTANTS.HashAlgorithms.sha256).then(
-      (hash) => {
+    const actors = data.actor;
+    JSHash(movieTitle + actors, CONSTANTS.HashAlgorithms.sha256)
+      .then((hash) => {
         updates["/all-movies/" + hash + "/" + userUid] = true;
         updates["/user-movies/" + userUid + "/" + hash] = data;
         update(ref(db), updates);
-      }
-    );
+      })
+      .catch((error) => console.log(error));
     disPatch(addMovie([data]));
   };
   return (
@@ -95,12 +91,7 @@ export default function Search({ navigation, route }) {
       </View>
       <View style={styles.MenuContainer}>
         {menus.map((menu) => (
-          <MenuTap
-            key={menu.id}
-            userUid={userUid}
-            title={menu.title}
-            navigation={navigation}
-          />
+          <MenuTap key={menu.id} title={menu.title} navigation={navigation} />
         ))}
       </View>
     </>

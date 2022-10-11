@@ -4,10 +4,13 @@ import Login from "../screens/Login";
 import Home from "../screens/Home";
 import Search from "../screens/Search";
 import Mypage from "../screens/Mypage";
+import { useSelector } from "react-redux";
 
 const Stack = createNativeStackNavigator();
 
-export default function Navigation({ isLogin }) {
+export default function Navigation() {
+  const isLogin = useSelector((state) => state.user.isLogin);
+
   return (
     <NavigationContainer>
       <Stack.Navigator

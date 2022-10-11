@@ -4,7 +4,7 @@ import { windowWidth } from "../util/WH";
 
 export default function Poster({ data, isOnlyImg = false }) {
   const extractTextPattern = /(<([^>]+)>)/gi;
-  // console.log(data);
+
   return (
     <View style={styles.container}>
       {data.image ? (
@@ -22,12 +22,12 @@ export default function Poster({ data, isOnlyImg = false }) {
           }}
         />
       )}
-      {isOnlyImg ? (
-        <></>
-      ) : (
+      {data.title !== undefined && isOnlyImg ? (
         <Text style={styles.posterTitle} numberOfLines={2}>
           {data.title.replace(extractTextPattern, "")}
         </Text>
+      ) : (
+        <></>
       )}
     </View>
   );

@@ -16,7 +16,6 @@ import { windowWidth, windowHeight } from "../util/WH";
 
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
-import { initializeApp } from "firebase/app";
 import {
   getAuth,
   GoogleAuthProvider,
@@ -28,17 +27,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { ref, set, child, push, update } from "firebase/database";
 import { db } from "../../firebaseConfig";
 import { GOOGLE_CLIENT_ID } from "react-native-dotenv";
-initializeApp({
-  apiKey: "AIzaSyBxN4EyG1xSXOp5zWKBS-svPd93RUVZtCQ",
-  authDomain: "samemate-ee922.firebaseapp.com",
-  databaseURL: "https://samemate-ee922-default-rtdb.firebaseio.com",
-  projectId: "samemate-ee922",
-  storageBucket: "samemate-ee922.appspot.com",
-  messagingSenderId: "320208000348",
-  appId: "1:320208000348:web:6489535f23dfd414c15d99",
-  measurementId: "G-2WLXW23624",
-  databaseURL: "https://samemate-ee922-default-rtdb.firebaseio.com/",
-});
 
 WebBrowser.maybeCompleteAuthSession("https://expo.dev");
 

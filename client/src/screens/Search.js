@@ -1,30 +1,34 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import SearchBar from "../components/SearchBar";
 import { menus } from "../../dummy/data";
 import MenuTap from "../components/MenuTap";
 import axios from "axios";
 import SearchResult from "../components/SearchResult";
-import { CLIENT_ID, CLIENT_KEY } from "react-native-dotenv";
+import { NAVER_API_CLIENT_ID, NAVER_API_CLIENT_KEY } from "react-native-dotenv";
 import { db } from "../../firebaseConfig";
 import { ref, update } from "firebase/database";
 import { useDispatch, useSelector } from "react-redux";
 import { addMovie } from "../redux/slice/movieSlice";
 import { JSHash, CONSTANTS } from "react-native-hash";
+import { TwoButtonModal } from "../components/TwoButtonModal";
 
 export default function Search({ navigation }) {
-  const [movies, setMovies] = useState([]);
+  const disPatch = useDispatch();
+  const [searchMovies, setSearchMovies] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const extractTextPattern = /(<([^>]+)>)/gi;
   const userUid = useSelector((state) => state.user.uid);
-  const disPatch = useDispatch();
+  const userMovies = useSelector((state) => state.movie.movie_list);
 
+  const [modalVisible, setModalVisible] = useState(false);
   const getMovies = async (word) => {
     if (word.length > 1) {
       setIsSearching(true);
@@ -32,34 +36,52 @@ export default function Search({ navigation }) {
         `https://openapi.naver.com/v1/search/movie.json?query=${word}&display=100`,
         {
           headers: {
-            "X-Naver-Client-Id": CLIENT_ID,
-            "X-Naver-Client-Secret": CLIENT_KEY,
+            "X-Naver-Client-Id": NAVER_API_CLIENT_ID,
+            "X-Naver-Client-Secret": NAVER_API_CLIENT_KEY,
           },
         }
       );
 
       if (result.data) {
-        setMovies(result.data.items);
+        setSearchMovies(result.data.items);
       }
       setIsSearching(false);
     }
   };
 
-  const addFavorite = (data) => {
-    const updates = {};
-    const movieTitle = data.title.replace(extractTextPattern, "");
-    const actors = data.actor;
-    JSHash(movieTitle + actors, CONSTANTS.HashAlgorithms.sha256)
-      .then((hash) => {
-        updates["/all-movies/" + hash + "/" + userUid] = true;
-        updates["/user-movies/" + userUid + "/" + hash] = data;
-        update(ref(db), updates);
-      })
-      .catch((error) => console.log(error));
-    disPatch(addMovie([data]));
+  const addUserMovie = (data) => {
+    if (userMovies.length > 10) {
+      setModalVisible(true);
+    } else {
+      const updates = {};
+      const movieTitle = data.title.replace(extractTextPattern, "");
+      const actors = data.actor;
+      JSHash(movieTitle + actors, CONSTANTS.HashAlgorithms.sha256)
+        .then((hash) => {
+          updates["/all-movies/" + hash + "/" + userUid] = true;
+          updates["/user-movies/" + userUid + "/" + hash] = data;
+          update(ref(db), updates);
+        })
+        .catch((error) => console.log(error));
+      disPatch(addMovie([data]));
+    }
   };
+
+  const modalCheckButton = () => {
+    setModalVisible(false);
+  };
+
+  const modalEditButton = () => {
+    setModalVisible(false);
+  };
+
   return (
     <>
+      <TwoButtonModal
+        btnFunc1={modalCheckButton}
+        btnFunc2={modalEditButton}
+        state={modalVisible}
+      />
       <View style={styles.container}>
         <View style={styles.marginTB10}>
           <SearchBar getMovies={getMovies} />
@@ -67,7 +89,7 @@ export default function Search({ navigation }) {
         <View style={styles.resultLengthBox}>
           <Text
             style={styles.resultLength}
-          >{`검색 결과 : ${movies.length} 개`}</Text>
+          >{`검색 결과 : ${searchMovies.length} 개`}</Text>
         </View>
         {isSearching ? (
           <View
@@ -83,8 +105,12 @@ export default function Search({ navigation }) {
             horizontal={false}
             contentContainerStyle={styles.resultContainer}
           >
-            {movies.map((movie, idx) => (
-              <SearchResult movie={movie} key={idx} addFavorite={addFavorite} />
+            {searchMovies.map((movie, idx) => (
+              <SearchResult
+                movie={movie}
+                key={idx}
+                addUserMovie={addUserMovie}
+              />
             ))}
           </ScrollView>
         )}

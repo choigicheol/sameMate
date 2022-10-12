@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import OverFlowText from "./OverFlowText";
 import Poster from "./Poster";
 
-export default function SearchResult({ movie, addFavorite }) {
+export default function SearchResult({ movie, addUserMovie }) {
   const extractTextPattern = /(<([^>]+)>)/gi;
   const category = {
     title: "제목 : ",
@@ -30,7 +30,7 @@ export default function SearchResult({ movie, addFavorite }) {
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => {
-          addFavorite(movie);
+          addUserMovie(movie);
         }}
       >
         <Text>담기</Text>

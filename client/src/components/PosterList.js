@@ -1,9 +1,21 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import Poster from "./Poster";
 import { windowWidth } from "../util/WH";
 
-export default function PosterList({ name, favorites, isOnlyImg }) {
+export default function PosterList({
+  name,
+  favorites,
+  isOnlyImg,
+  isDelete,
+  isEditMode,
+}) {
   return (
     <>
       <View
@@ -15,7 +27,7 @@ export default function PosterList({ name, favorites, isOnlyImg }) {
           flexDirection: "row",
         }}
       >
-        <Text style={styles.userName}>{name}</Text>
+        {name ? <Text style={styles.userName}>{name}</Text> : <></>}
         {/* <Text style={styles.userText}>님의 리스트</Text> */}
       </View>
       <View style={styles.userContainer}>
@@ -26,7 +38,13 @@ export default function PosterList({ name, favorites, isOnlyImg }) {
         >
           {favorites.length ? (
             favorites.map((favorite, idx) => (
-              <Poster data={favorite} key={idx} isOnlyImg={isOnlyImg} />
+              <Poster
+                data={favorite}
+                key={idx}
+                isOnlyImg={isOnlyImg}
+                isEditMode={isEditMode}
+                isDelete={isDelete}
+              />
             ))
           ) : (
             <View
@@ -36,7 +54,9 @@ export default function PosterList({ name, favorites, isOnlyImg }) {
                 alignItems: "center",
               }}
             >
-              <Text style={{ fontWeight: "bold" }}>정보가 없습니다</Text>
+              <Text style={{ fontWeight: "bold", color: "#9e9e9e" }}>
+                정보가 없습니다
+              </Text>
             </View>
           )}
         </ScrollView>
@@ -55,9 +75,10 @@ const styles = StyleSheet.create({
     // borderTopWidth: 1,
   },
   userName: {
-    fontSize: 25,
+    fontSize: 22,
     fontWeight: "bold",
     color: "#32AAFF",
+    fontFamily: "oneMobile",
   },
   userText: {
     fontSize: 12,

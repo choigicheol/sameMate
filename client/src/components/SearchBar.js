@@ -12,6 +12,7 @@ export default function SearchBar({ getMovies }) {
         onChangeText={(text) => setSearchWord(text)}
         onEndEditing={() => getMovies(searchWord)}
         placeholder={"검색어를 입력해주세요"}
+        placeholderTextColor="#9e9e9e"
       ></TextInput>
     </View>
   );
@@ -24,10 +25,12 @@ const styles = StyleSheet.create({
   },
   searchTap: {
     width: windowWidth - 20,
-    height: 40,
+    height: 50,
     borderWidth: 1,
     borderColor: "#4e4e4e",
     borderRadius: 5,
     paddingLeft: 10,
+    fontSize: 16,
+    color: "#9e9e9e",
   },
 });

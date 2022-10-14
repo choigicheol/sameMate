@@ -33,7 +33,7 @@ export default function SearchResult({ movie, addUserMovie }) {
           addUserMovie(movie);
         }}
       >
-        <Text>담기</Text>
+        <Text style={{ color: "#ffffff" }}>담기</Text>
       </TouchableOpacity>
     </View>
   );
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 180,
     borderTopWidth: 1,
-    borderColor: "#4e4e4e",
+    borderColor: "#9e9e9e",
     borderStyle: "dashed",
     paddingTop: 10,
     paddingBottom: 10,
@@ -60,12 +60,14 @@ const styles = StyleSheet.create({
   },
   resultInfoText: {
     marginBottom: 10,
+    color: "#9e9e9e",
   },
   addButton: {
     width: 50,
     height: 30,
     borderWidth: 1,
     borderRadius: 4,
+    borderColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
   },

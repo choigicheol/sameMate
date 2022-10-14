@@ -18,7 +18,7 @@ import {
   deleteMovie,
   setSameUserData,
 } from "../redux/slice/movieSlice";
-import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
+
 import { setSameUserList } from "../redux/slice/userSlice";
 import { windowHeight } from "../util/WH";
 
@@ -106,31 +106,18 @@ export default function Home({ navigation }) {
         >
           {movies.length ? (
             <>
-              <PosterList name={userName} favorites={movies} isOnlyImg={true} />
+              <PosterList
+                name={userName}
+                favorites={movies}
+                isOnlyImg={false}
+              />
               <View
                 style={{
                   marginTop: 10,
                   alignItems: "center",
                 }}
               >
-                <Text
-                  style={{
-                    borderBottomWidth: 5,
-                    borderColor: "orange",
-                    fontWeight: "bold",
-                    color: "orange",
-                    fontSize: 20,
-                    marginBottom: 10,
-                    marginTop: 10,
-                    paddingBottom: 10,
-                    marginLeft: 5,
-                    width: 150,
-                    textAlign: "center",
-                    borderRadius: 10,
-                  }}
-                >
-                  추천목록 🗒
-                </Text>
+                <Text style={styles.recommendationList}>추천 목록 🗒</Text>
               </View>
             </>
           ) : (
@@ -149,7 +136,7 @@ export default function Home({ navigation }) {
               key={idx}
               name={data[0]}
               favorites={data[1]}
-              isOnlyImg={true}
+              isOnlyImg={false}
             />
           ))}
         </ScrollView>
@@ -166,10 +153,24 @@ export default function Home({ navigation }) {
 const styles = StyleSheet.create({
   scrollViewContainer: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#000000",
   },
   MenuContainer: {
     flexDirection: "row",
-    backgroundColor: "#32AAFF",
+    backgroundColor: "#000000",
+  },
+  recommendationList: {
+    borderBottomWidth: 5,
+    borderColor: "#ffffff",
+    fontWeight: "bold",
+    color: "#ffffff",
+    fontSize: 20,
+    marginBottom: 10,
+    marginTop: 10,
+    paddingBottom: 10,
+    marginLeft: 5,
+    width: "90%",
+    textAlign: "center",
+    borderRadius: 10,
   },
 });

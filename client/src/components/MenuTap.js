@@ -20,5 +20,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 50,
   },
-  menuText: { color: "#FFFFFF" },
+  menuText: { color: "#9e9e9e" },
 });

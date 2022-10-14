@@ -17,14 +17,14 @@ import { db } from "../../firebaseConfig";
 import { ref, update } from "firebase/database";
 import { useDispatch, useSelector } from "react-redux";
 import { addMovie } from "../redux/slice/movieSlice";
-import { JSHash, CONSTANTS } from "react-native-hash";
 import { TwoButtonModal } from "../components/TwoButtonModal";
+import { GetMovieHash } from "../util/GetMovieHash";
 
 export default function Search({ navigation }) {
   const disPatch = useDispatch();
   const [searchMovies, setSearchMovies] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const extractTextPattern = /(<([^>]+)>)/gi;
+  // const extractTextPattern = /(<([^>]+)>)/gi;
   const userUid = useSelector((state) => state.user.uid);
   const userMovies = useSelector((state) => state.movie.movie_list);
 
@@ -49,20 +49,20 @@ export default function Search({ navigation }) {
     }
   };
 
-  const addUserMovie = (data) => {
-    if (userMovies.length > 10) {
+  const addUserMovie = async (data) => {
+    if (userMovies.length >= 10) {
       setModalVisible(true);
     } else {
       const updates = {};
-      const movieTitle = data.title.replace(extractTextPattern, "");
+      const title = data.title;
       const actors = data.actor;
-      JSHash(movieTitle + actors, CONSTANTS.HashAlgorithms.sha256)
-        .then((hash) => {
-          updates["/all-movies/" + hash + "/" + userUid] = true;
-          updates["/user-movies/" + userUid + "/" + hash] = data;
-          update(ref(db), updates);
-        })
-        .catch((error) => console.log(error));
+      const movieHash = await GetMovieHash(title, actors);
+      if (movieHash) {
+        console.log(movieHash, "searchHash");
+        updates["/all-movies/" + movieHash + "/" + userUid] = true;
+        updates["/user-movies/" + userUid + "/" + movieHash] = data;
+        update(ref(db), updates);
+      }
       disPatch(addMovie([data]));
     }
   };
@@ -86,10 +86,12 @@ export default function Search({ navigation }) {
         <View style={styles.marginTB10}>
           <SearchBar getMovies={getMovies} />
         </View>
-        <View style={styles.resultLengthBox}>
-          <Text
-            style={styles.resultLength}
-          >{`검색 결과 : ${searchMovies.length} 개`}</Text>
+        <View style={styles.resultCountBox}>
+          <Text style={styles.resultCount}>검색 결과</Text>
+          <Text style={[styles.resultCount, styles.number]}>
+            {searchMovies.length}
+          </Text>
+          <Text style={styles.resultCount}>개</Text>
         </View>
         {isSearching ? (
           <View
@@ -127,7 +129,7 @@ export default function Search({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#000000",
   },
   marginTB10: {
     marginTop: 10,
@@ -137,15 +139,25 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
   },
-  resultLengthBox: {
+  resultCountBox: {
     flexDirection: "row",
     justifyContent: "flex-end",
     marginRight: 10,
   },
-  resultLength: { marginBottom: 10, fontWeight: "bold", color: "#4e4e4e" },
+  resultCount: {
+    fontSize: 16,
+    marginBottom: 10,
+    fontWeight: "bold",
+    color: "#2e2e2e",
+  },
 
   MenuContainer: {
     flexDirection: "row",
-    backgroundColor: "#32AAFF",
+    backgroundColor: "#000000",
+  },
+  number: {
+    color: "#32AAFF",
+    marginRight: 5,
+    marginLeft: 5,
   },
 });

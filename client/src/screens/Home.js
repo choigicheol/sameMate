@@ -96,7 +96,13 @@ export default function Home({ navigation }) {
   return (
     <>
       {isLoading ? (
-        <View style={{ height: windowHeight - 74, justifyContent: "center" }}>
+        <View
+          style={{
+            backgroundColor: "#000000",
+            height: windowHeight - 74,
+            justifyContent: "center",
+          }}
+        >
           <ActivityIndicator size="large" color="tomato" />
         </View>
       ) : (

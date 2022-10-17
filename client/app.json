@@ -19,15 +19,13 @@
       "supportsTablet": true
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "",
-        "backgroundColor": "#FFFFFF"
-      },
-      "package": "com.gigichoi.client"
+      "package": "com.gigichoi.client",
+      "googleServicesFile": "./google-services.json"
     },
-    "scheme": "myapp",
+    "scheme": "com.gigichoi.client",
     "web": {
       "favicon": ""
-    }
+    },
+    "plugins": ["@react-native-google-signin/google-signin"]
   }
 }

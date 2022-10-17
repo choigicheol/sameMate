@@ -4,7 +4,6 @@ import {
   Text,
   View,
   TextInput,
-  Dimensions,
   TouchableOpacity,
   ActivityIndicator,
   Keyboard,
@@ -13,10 +12,6 @@ import {
 } from "react-native";
 
 import { windowWidth, windowHeight } from "../util/WH";
-
-import * as WebBrowser from "expo-web-browser";
-import { WebView } from "react-native-webview";
-import * as Google from "expo-auth-session/providers/google";
 import {
   getAuth,
   GoogleAuthProvider,
@@ -24,13 +19,27 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { setUser } from "../redux/slice/userSlice";
-import { useSelector, useDispatch } from "react-redux";
-import { ref, remove, set, child, push, update } from "firebase/database";
+import { useDispatch } from "react-redux";
+import { ref, update } from "firebase/database";
 import { db } from "../../firebaseConfig";
 import {
   GOOGLE_CLIENT_ID,
   ANDROID_GOOGLE_CLIENT_ID,
 } from "react-native-dotenv";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
+import { initializeApp } from "firebase/app";
+
+initializeApp({
+  apiKey: "AIzaSyBxN4EyG1xSXOp5zWKBS-svPd93RUVZtCQ",
+  authDomain: "samemate-ee922.firebaseapp.com",
+  projectId: "samemate-ee922",
+  storageBucket: "samemate-ee922.appspot.com",
+  messagingSenderId: "320208000348",
+  appId: "1:320208000348:web:6489535f23dfd414c15d99",
+  measurementId: "G-2WLXW23624",
+  databaseURL: "https://samemate-ee922-default-rtdb.firebaseio.com/",
+});
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -39,21 +48,22 @@ export default function Login({ navigation }) {
   const [password, setPassword] = useState("");
   const [isEnter, setIsEnter] = useState(false);
   const [isMessage, setIsMessage] = useState(false);
+
   const dispatch = useDispatch();
+
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     expoClientId: GOOGLE_CLIENT_ID,
     androidClientId: ANDROID_GOOGLE_CLIENT_ID,
   });
 
-  const auth = getAuth();
-
   const openGoogleLogin = () => {
     promptAsync();
   };
 
+  const auth = getAuth();
+
   useEffect(() => {
     if (response?.type === "success") {
-      console.log(response);
       setIsEnter(true);
       const { id_token } = response.params;
       const credential = GoogleAuthProvider.credential(id_token);
@@ -74,8 +84,8 @@ export default function Login({ navigation }) {
         setUser({ uid, email, name: displayName, accessToken, isLogin: true })
       );
       setUserName(uid, displayName);
-      setIsEnter(false);
       navigation.navigate("Home");
+      setIsEnter(false);
     }
   });
 
@@ -85,63 +95,63 @@ export default function Login({ navigation }) {
         Keyboard.dismiss();
       }}
     >
-      {isEnter ? (
-        <></>
-      ) : (
-        // <WebView
-        //   style={{ flex: 1 }}
-        //   source={{ uri: "https://auth.expo.io" }}
-        //   userAgent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"
-        //   sharedCookiesEnabled={true}
-        //   thirdPartyCookiesEnabled={true}
-        // />
-        <View style={styles.container}>
-          <View style={styles.titleBox}>
-            <Text style={styles.title}>Same Mate</Text>
+      <View style={styles.container}>
+        {isEnter ? (
+          <View style={[styles.centered, styles.backgroundBlack]}>
+            <ActivityIndicator size="large" color="tomato" />
           </View>
-          <View style={styles.inputBox}>
-            <Text style={styles.loginText}>ID</Text>
-            <TextInput
-              style={styles.loginInput}
-              placeholder={"아이디"}
-              placeholderTextColor="#9e9e9e"
-              onChangeText={setId}
-            />
-            <Text style={styles.loginText}>PassWord</Text>
-            <TextInput
-              style={styles.loginInput}
-              placeholder={"비밀번호"}
-              placeholderTextColor="#9e9e9e"
-              onChangeText={setPassword}
-            />
-            {isEnter ? <ActivityIndicator size="large" color="tomato" /> : ""}
-            <View style={styles.warningContainer}>
-              {isMessage ? (
-                <Text style={styles.warningMsg}>일치하는 회원이 없습니다.</Text>
-              ) : (
-                ""
-              )}
+        ) : (
+          <>
+            <View style={styles.titleBox}>
+              <Text style={styles.title}>Same Mate</Text>
             </View>
-            <TouchableOpacity style={styles.loginButton} onPress={() => {}}>
-              <Text style={styles.loginButtonText}>Login</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.googleLoginButton}
-              onPress={() => {
-                openGoogleLogin();
-              }}
-            >
-              <Image
-                style={{ width: "100%", height: "100%" }}
-                source={require("../assets/googleButton.png")}
+            <View style={styles.inputBox}>
+              <Text style={styles.loginText}>ID</Text>
+              <TextInput
+                style={styles.loginInput}
+                placeholder={"아이디"}
+                placeholderTextColor="#9e9e9e"
+                onChangeText={setId}
               />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.signupButton} onPress={() => {}}>
-              <Text style={styles.signupButtonText}>SignUp</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+              <Text style={styles.loginText}>PassWord</Text>
+              <TextInput
+                style={styles.loginInput}
+                placeholder={"비밀번호"}
+                placeholderTextColor="#9e9e9e"
+                onChangeText={setPassword}
+              />
+
+              <View style={styles.warningContainer}>
+                {isMessage ? (
+                  <Text style={styles.warningMsg}>
+                    일치하는 회원이 없습니다.
+                  </Text>
+                ) : (
+                  ""
+                )}
+              </View>
+              <TouchableOpacity style={styles.loginButton} onPress={() => {}}>
+                <Text style={styles.loginButtonText}>Login</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.googleLoginButton}
+                disabled={!request}
+                onPress={() => {
+                  openGoogleLogin();
+                }}
+              >
+                <Image
+                  style={{ width: "100%", height: "100%" }}
+                  source={require("../assets/googleButton.png")}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.signupButton} onPress={() => {}}>
+                <Text style={styles.signupButtonText}>SignUp</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+      </View>
     </TouchableWithoutFeedback>
   );
 }
@@ -152,6 +162,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#000000",
     alignItems: "center",
     justifyContent: "center",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   titleBox: {
     width: windowWidth - 60,
@@ -228,5 +243,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#32AAFF",
     fontWeight: "bold",
+  },
+  backgroundBlack: {
+    backgroundColor: "#000000",
   },
 });

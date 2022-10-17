@@ -5,6 +5,7 @@ import Home from "../screens/Home";
 import Search from "../screens/Search";
 import Mypage from "../screens/Mypage";
 import { useSelector } from "react-redux";
+import Signup from "../screens/Signup";
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +22,7 @@ export default function Navigation() {
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Search" component={Search} />
         <Stack.Screen name="Mypage" component={Mypage} />
+        <Stack.Screen name="Signup" component={Signup} />
       </Stack.Navigator>
     </NavigationContainer>
   );

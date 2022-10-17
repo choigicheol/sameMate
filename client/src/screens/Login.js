@@ -20,7 +20,7 @@ import {
 } from "firebase/auth";
 import { setUser } from "../redux/slice/userSlice";
 import { useDispatch } from "react-redux";
-import { ref, update } from "firebase/database";
+import { get, ref, update, child } from "firebase/database";
 import { db } from "../../firebaseConfig";
 import {
   GOOGLE_CLIENT_ID,
@@ -29,6 +29,7 @@ import {
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { initializeApp } from "firebase/app";
+import { CheckEmail, GetHash } from "../util/Functions";
 
 initializeApp({
   apiKey: "AIzaSyBxN4EyG1xSXOp5zWKBS-svPd93RUVZtCQ",
@@ -44,10 +45,10 @@ initializeApp({
 WebBrowser.maybeCompleteAuthSession();
 
 export default function Login({ navigation }) {
-  const [id, setId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isEnter, setIsEnter] = useState(false);
-  const [isMessage, setIsMessage] = useState(false);
+  const [isWarning, setIsWarning] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -61,6 +62,7 @@ export default function Login({ navigation }) {
   };
 
   const auth = getAuth();
+  const dbRef = ref(db);
 
   useEffect(() => {
     if (response?.type === "success") {
@@ -74,7 +76,7 @@ export default function Login({ navigation }) {
   const setUserName = (uid, displayName) => {
     const updates = {};
     updates["/userName/" + uid] = displayName;
-    update(ref(db), updates);
+    update(dbRef, updates);
   };
 
   onAuthStateChanged(auth, (user) => {
@@ -88,6 +90,30 @@ export default function Login({ navigation }) {
       setIsEnter(false);
     }
   });
+
+  const userSignIn = async () => {
+    setIsWarning(false);
+    const hashEmail = await GetHash(email);
+    if (await CheckEmail(hashEmail)) {
+      const inputPassword = await GetHash(password);
+      const dbUserInfo = await get(child(dbRef, `users/${hashEmail}`));
+      const userInfoValue = dbUserInfo.val();
+      if (userInfoValue.password === inputPassword) {
+        const { email, displayName, accessToken } = userInfoValue;
+        dispatch(
+          setUser({
+            uid: hashEmail,
+            email,
+            name: displayName,
+            accessToken,
+            isLogin: true,
+          })
+        );
+        setUserName(hashEmail, displayName);
+        navigation.navigate("Home");
+      }
+    } else setIsWarning(true);
+  };
 
   return (
     <TouchableWithoutFeedback
@@ -111,18 +137,19 @@ export default function Login({ navigation }) {
                 style={styles.loginInput}
                 placeholder={"아이디"}
                 placeholderTextColor="#9e9e9e"
-                onChangeText={setId}
+                onChangeText={setEmail}
               />
               <Text style={styles.loginText}>PassWord</Text>
               <TextInput
                 style={styles.loginInput}
                 placeholder={"비밀번호"}
+                secureTextEntry={true}
                 placeholderTextColor="#9e9e9e"
                 onChangeText={setPassword}
               />
 
               <View style={styles.warningContainer}>
-                {isMessage ? (
+                {isWarning ? (
                   <Text style={styles.warningMsg}>
                     일치하는 회원이 없습니다.
                   </Text>
@@ -130,7 +157,12 @@ export default function Login({ navigation }) {
                   ""
                 )}
               </View>
-              <TouchableOpacity style={styles.loginButton} onPress={() => {}}>
+              <TouchableOpacity
+                style={styles.loginButton}
+                onPress={() => {
+                  userSignIn();
+                }}
+              >
                 <Text style={styles.loginButtonText}>Login</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -145,7 +177,12 @@ export default function Login({ navigation }) {
                   source={require("../assets/googleButton.png")}
                 />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.signupButton} onPress={() => {}}>
+              <TouchableOpacity
+                style={styles.signupButton}
+                onPress={() => {
+                  navigation.navigate("Signup");
+                }}
+              >
                 <Text style={styles.signupButtonText}>SignUp</Text>
               </TouchableOpacity>
             </View>
@@ -192,6 +229,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingLeft: 10,
     marginBottom: 15,
+    color: "#9e9e9e",
   },
   loginText: {
     color: "#32AAFF",

@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteMovie } from "../redux/slice/movieSlice";
 import { windowWidth } from "../util/WH";
 import { db } from "../../firebaseConfig";
-import { GetMovieHash } from "../util/GetMovieHash";
+import { GetMovieHash } from "../util/Functions";
 
 export default function Poster({
   data,

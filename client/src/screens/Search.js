@@ -18,7 +18,7 @@ import { ref, update } from "firebase/database";
 import { useDispatch, useSelector } from "react-redux";
 import { addMovie } from "../redux/slice/movieSlice";
 import { TwoButtonModal } from "../components/TwoButtonModal";
-import { GetMovieHash } from "../util/GetMovieHash";
+import { GetMovieHash } from "../util/Functions";
 
 export default function Search({ navigation }) {
   const disPatch = useDispatch();

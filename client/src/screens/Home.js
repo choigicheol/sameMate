@@ -5,6 +5,7 @@ import {
   Text,
   ScrollView,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 
 import MenuTap from "../components/MenuTap";
@@ -127,15 +128,42 @@ export default function Home({ navigation }) {
               </View>
             </>
           ) : (
-            <View
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-                height: 150,
-              }}
-            >
-              <Text>데이터가 없습니다.</Text>
-            </View>
+            <>
+              <View
+                style={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: 150,
+                }}
+              >
+                <Text
+                  style={{ color: "#9e9e9e", fontWeight: "bold", fontSize: 20 }}
+                >
+                  정보가 없습니다.
+                </Text>
+                <Text
+                  style={{ color: "#9e9e9e", fontWeight: "bold", fontSize: 20 }}
+                >
+                  Search 탭에서 영화를 담아보세요
+                </Text>
+              </View>
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <TouchableOpacity
+                  style={styles.moveButton}
+                  onPress={() => {
+                    navigation.navigate("Search");
+                  }}
+                >
+                  <Text style={styles.moveButtonText}>이동하기</Text>
+                </TouchableOpacity>
+              </View>
+            </>
           )}
           {sameUserMovies.map((data, idx) => (
             <PosterList
@@ -178,5 +206,19 @@ const styles = StyleSheet.create({
     width: "90%",
     textAlign: "center",
     borderRadius: 10,
+  },
+  moveButton: {
+    width: 100,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderRadius: 8,
+    backgroundColor: "#32AAFF",
+  },
+  moveButtonText: {
+    color: "#ffffff",
+    fontWeight: "bold",
+    fontSize: 20,
   },
 });

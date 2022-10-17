@@ -21,6 +21,7 @@ export default function Poster({
     if (isSelect) {
       const movieHash = await GetMovieHash(data.title, data.actor);
       await db.ref(`user-movies/${userUid}/${movieHash}`).remove();
+      await db.ref(`all-movies/${movieHash}/${userUid}`).remove();
       dispatch(deleteMovie(data));
       setIsSelect(false);
     }

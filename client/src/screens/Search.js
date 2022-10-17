@@ -58,7 +58,6 @@ export default function Search({ navigation }) {
       const actors = data.actor;
       const movieHash = await GetMovieHash(title, actors);
       if (movieHash) {
-        console.log(movieHash, "searchHash");
         updates["/all-movies/" + movieHash + "/" + userUid] = true;
         updates["/user-movies/" + userUid + "/" + movieHash] = data;
         update(ref(db), updates);

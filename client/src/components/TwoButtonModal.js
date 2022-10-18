@@ -12,7 +12,7 @@ export function TwoButtonModal({ btnFunc1, btnFunc2, state }) {
   return (
     <View style={styles.centeredView}>
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={state}
         onRequestClose={() => btnFunc1()}

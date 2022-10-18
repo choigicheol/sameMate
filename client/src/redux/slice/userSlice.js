@@ -7,6 +7,7 @@ const initialState = {
   accessToken: "",
   sameUserList: [],
   isLogin: false,
+  loginType: "",
 };
 
 const userSlice = createSlice({
@@ -19,6 +20,7 @@ const userSlice = createSlice({
       state.name = action.payload.name;
       state.accessToken = action.payload.accessToken;
       state.isLogin = action.payload.isLogin;
+      state.loginType = action.payload.loginType;
     },
     setName(state, action) {
       state.name = action.payload;
@@ -39,6 +41,7 @@ const userSlice = createSlice({
       state.accessToken = "";
       state.sameUserList = [];
       state.isLogin = false;
+      state.loginType = "";
     },
   },
   //extraReducer는 비동기 액션 생성시 필요

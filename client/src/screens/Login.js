@@ -79,13 +79,27 @@ export default function Login({ navigation }) {
     update(dbRef, updates);
   };
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
-      const { uid, email, displayName, accessToken } = user;
-      dispatch(
-        setUser({ uid, email, name: displayName, accessToken, isLogin: true })
-      );
-      setUserName(uid, displayName);
+      let { uid, email, displayName, accessToken } = user;
+      get(child(dbRef, `userName/${uid}`)).then((data) => {
+        if (data.exists()) {
+          const userName = data.val();
+          displayName = userName;
+        } else {
+          setUserName(uid, displayName);
+        }
+        dispatch(
+          setUser({
+            uid,
+            email,
+            name: displayName,
+            accessToken,
+            isLogin: true,
+            loginType: "google",
+          })
+        );
+      });
       navigation.navigate("Home");
       setIsEnter(false);
     }
@@ -107,6 +121,7 @@ export default function Login({ navigation }) {
             name: displayName,
             accessToken,
             isLogin: true,
+            loginType: "init",
           })
         );
         setUserName(hashEmail, displayName);

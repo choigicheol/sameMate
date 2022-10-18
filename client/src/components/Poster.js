@@ -29,7 +29,7 @@ export default function Poster({
 
   const pressImgSelect = () => {
     if (isEditMode) setIsSelect(!isSelect);
-    else showOverview(movie);
+    else if (showOverview) showOverview(movie);
   };
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function Poster({
   useEffect(() => {
     if (isEditMode) setIsSelect(false);
   }, [isEditMode]);
-  console.log(movie);
+
   return (
     <View style={styles.container}>
       {typeof movie === "object" ? (

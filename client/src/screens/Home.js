@@ -180,8 +180,14 @@ export default function Home({ navigation }) {
               name={data[0]}
               favorites={data[1]}
               isOnlyImg={false}
+              showOverview={showOverview}
             />
           ))}
+          <OverviewModal
+            movie={selectMovie}
+            showOverview={showOverview}
+            state={isShowModal}
+          />
         </ScrollView>
       )}
       <View style={styles.MenuContainer}>
@@ -189,11 +195,6 @@ export default function Home({ navigation }) {
           <MenuTap key={menu.id} title={menu.title} navigation={navigation} />
         ))}
       </View>
-      <OverviewModal
-        movie={selectMovie}
-        showOverview={showOverview}
-        state={isShowModal}
-      />
     </>
   );
 }

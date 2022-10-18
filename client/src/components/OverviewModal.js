@@ -8,8 +8,6 @@ import {
   View,
   Image,
   ScrollView,
-  TouchableHighlight,
-  Pressable,
 } from "react-native";
 import OverFlowText from "./OverFlowText";
 
@@ -29,12 +27,24 @@ export function OverviewModal({ movie, showOverview, state }) {
       onRequestClose={() => {
         showOverview();
       }}
-      onBackdropPress={() => {
-        showOverview();
-      }}
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
+          <View
+            style={{
+              width: "100%",
+              alignItems: "flex-end",
+            }}
+          >
+            <TouchableOpacity
+              style={[styles.closeButton]}
+              onPress={() => {
+                showOverview();
+              }}
+            >
+              <Text style={{ color: "#ffffff", fontWeight: "bold" }}>닫기</Text>
+            </TouchableOpacity>
+          </View>
           {movie.poster_path ? (
             <Image
               style={styles.modalPosterImage}
@@ -73,21 +83,29 @@ export function OverviewModal({ movie, showOverview, state }) {
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
-    justifyContent: "center",
+    marginTop: 50,
     alignItems: "center",
   },
 
   modalView: {
     width: "80%",
-    height: "80%",
+    height: "90%",
     backgroundColor: "#2e2e2e",
     borderRadius: 10,
     padding: 20,
     opacity: 0.9,
     alignItems: "center",
+    paddingTop: 0,
   },
-  buttonClose: {
-    backgroundColor: "#32AAFF",
+  closeButton: {
+    width: 45,
+    height: 25,
+    marginTop: 10,
+    marginBottom: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    backgroundColor: "tomato",
   },
   textStyle: {
     color: "white",
@@ -101,7 +119,7 @@ const styles = StyleSheet.create({
   },
   modalPosterImage: {
     width: "100%",
-    height: "70%",
+    height: "60%",
     marginBottom: 20,
     resizeMethod: "scale",
     resizeMode: "center",

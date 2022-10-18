@@ -33,7 +33,7 @@ export const movieSlice = createSlice({
 export const {
   setMovie,
   addMovie,
-  deleteMovie,
+  deleteMovies,
   setSameUserData,
   movieSliceReset,
 } = movieSlice.actions;

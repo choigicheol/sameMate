@@ -183,6 +183,13 @@ export default function Home({ navigation }) {
               showOverview={showOverview}
             />
           ))}
+          {!sameUserMovies.length && !!movies.length && (
+            <View style={styles.centeredView}>
+              <Text style={{ color: "#ffffff", marginTop: 20, fontSize: 16 }}>
+                {"일치하는 유저가 없습니다"}
+              </Text>
+            </View>
+          )}
           <OverviewModal
             movie={selectMovie}
             showOverview={showOverview}
@@ -203,6 +210,11 @@ const styles = StyleSheet.create({
   scrollViewContainer: {
     flex: 1,
     backgroundColor: "#000000",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   MenuContainer: {
     flexDirection: "row",

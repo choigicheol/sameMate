@@ -13,28 +13,34 @@ export default function SearchResult({ movie, addUserMovie }) {
   const arrCategories = Object.keys(category);
   return (
     <View style={styles.resultContainer}>
-      <Poster movie={movie} />
-      <View style={styles.resultInfo}>
-        {arrCategories.map((cate, idx) => {
-          return (
-            <OverFlowText
-              category={category[cate]}
-              text={movie[cate]}
-              style={styles.resultInfoText}
-              key={idx}
-              name={cate}
-            ></OverFlowText>
-          );
-        })}
-      </View>
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => {
-          addUserMovie(movie);
-        }}
-      >
-        <Text style={{ color: "#ffffff" }}>담기</Text>
-      </TouchableOpacity>
+      {movie !== undefined ? (
+        <>
+          <Poster movie={movie} />
+          <View style={styles.resultInfo}>
+            {arrCategories.map((cate, idx) => {
+              return (
+                <OverFlowText
+                  category={category[cate]}
+                  text={movie[cate]}
+                  style={styles.resultInfoText}
+                  key={idx}
+                  name={cate}
+                ></OverFlowText>
+              );
+            })}
+          </View>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => {
+              addUserMovie(movie);
+            }}
+          >
+            <Text style={{ color: "#ffffff" }}>담기</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <></>
+      )}
     </View>
   );
 }

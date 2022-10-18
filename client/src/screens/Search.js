@@ -5,6 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  FlatList,
   Modal,
 } from "react-native";
 import SearchBar from "../components/SearchBar";
@@ -33,20 +34,51 @@ export default function Search({ navigation }) {
   const [searchCategory, setSearchCategory] = useState("movie");
   const [modalVisible, setModalVisible] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
+  const [page, setPage] = useState(1);
+  const [searchWord, setSearchWord] = useState("");
+  const [isAddModal, setIsAddModal] = useState(false);
 
   const getMovies = async (word) => {
     if (word.length > 1) {
       setIsSearching(true);
       const result = await axios.get(
-        // `https://openapi.naver.com/v1/search/movie.json?query=${word}&display=100`,
         `https://api.themoviedb.org/3/search/${searchCategory}?api_key=${TMDB_API_KEY}&page=1&query=${word}&language=ko-KR&include_adult=false`
       );
 
       if (result.data) {
+        if (searchCategory === "tv") {
+          result.data.results.map(
+            (tvProgram) => (tvProgram.title = tvProgram.name)
+          );
+        }
         setSearchMovies(result.data.results);
+        setSearchWord(word);
         setTotalResults(result.data.total_results);
       }
+
+      setPage(1);
       setIsSearching(false);
+    }
+  };
+
+  const getData = async () => {
+    setIsSearching(true);
+    await getNextPage(searchWord);
+    setIsSearching(false);
+  };
+
+  const getNextPage = async (word) => {
+    if (word.length > 1) {
+      const result = await axios.get(
+        `https://api.themoviedb.org/3/search/${searchCategory}?api_key=${TMDB_API_KEY}&page=${
+          page + 1
+        }&query=${word}&language=ko-KR&include_adult=false`
+      );
+      if (result.data) {
+        const newData = [...searchMovies, ...result.data.results];
+        setSearchMovies(newData);
+        setPage(page + 1);
+      }
     }
   };
 
@@ -54,6 +86,7 @@ export default function Search({ navigation }) {
     if (userMovies.length >= 10) {
       setModalVisible(true);
     } else {
+      setIsAddModal(true);
       const updates = {};
       const title = movie.title;
       const releaseDate = movie.release_date;
@@ -64,6 +97,9 @@ export default function Search({ navigation }) {
         update(ref(db), updates);
       }
       disPatch(addMovie([movie]));
+      setTimeout(() => {
+        setIsAddModal(false);
+      }, 300);
     }
   };
 
@@ -73,15 +109,46 @@ export default function Search({ navigation }) {
 
   const modalEditButton = () => {
     setModalVisible(false);
+    navigation.navigate("Mypage");
   };
 
   return (
     <>
+      {isSearching ? (
+        <View
+          style={{
+            width: "100%",
+            height: "100%",
+            justifyContent: "center",
+            alignItems: "center",
+            position: "absolute",
+            zIndex: 3,
+          }}
+        >
+          <ActivityIndicator size="large" color="tomato" />
+        </View>
+      ) : (
+        <></>
+      )}
+
+      <Modal animationType="fade" transparent visible={isAddModal}>
+        <View style={styles.addMessage}>
+          <View style={styles.addMessageView}>
+            <Text
+              style={{ fontWeight: "bold", color: "#ffffff", fontSize: 16 }}
+            >
+              List에 담겼습니다.
+            </Text>
+          </View>
+        </View>
+      </Modal>
+
       <TwoButtonModal
         btnFunc1={modalCheckButton}
         btnFunc2={modalEditButton}
         state={modalVisible}
       />
+
       <View style={styles.container}>
         <View style={styles.marginTB10}>
           <SearchBar getMovies={getMovies} />
@@ -93,29 +160,19 @@ export default function Search({ navigation }) {
           </Text>
           <Text style={styles.resultCount}>개</Text>
         </View>
-        {isSearching ? (
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-            }}
-          >
-            <ActivityIndicator size="large" color="tomato" />
-          </View>
-        ) : (
-          <ScrollView
-            horizontal={false}
-            contentContainerStyle={styles.resultContainer}
-          >
-            {searchMovies.map((movie, idx) => (
-              <SearchResult
-                movie={movie}
-                key={idx}
-                addUserMovie={addUserMovie}
-              />
-            ))}
-          </ScrollView>
-        )}
+
+        <FlatList
+          data={searchMovies}
+          style={styles.resultContainer}
+          renderItem={(movie) => {
+            return (
+              <SearchResult movie={movie.item} addUserMovie={addUserMovie} />
+            );
+          }}
+          keyExtractor={(item, index) => index}
+          onEndReached={getData}
+          onEndReachedThreshold={1}
+        />
       </View>
       <View style={styles.MenuContainer}>
         {menus.map((menu) => (
@@ -159,5 +216,15 @@ const styles = StyleSheet.create({
     color: "#32AAFF",
     marginRight: 5,
     marginLeft: 5,
+  },
+  addMessage: { flex: 1, justifyContent: "center", alignItems: "center" },
+  addMessageView: {
+    backgroundColor: "#32AAFF",
+    width: 220,
+    height: 30,
+    opacity: 0.8,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

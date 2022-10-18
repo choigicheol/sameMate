@@ -22,6 +22,7 @@ import {
 
 import { setSameUserList } from "../redux/slice/userSlice";
 import { windowHeight } from "../util/WH";
+import { OverviewModal } from "../components/OverviewModal";
 
 export default function Home({ navigation }) {
   const dispatch = useDispatch();
@@ -32,6 +33,8 @@ export default function Home({ navigation }) {
   const userName = useSelector((state) => state.user.name);
   const dbRef = ref(db);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectMovie, setSelectMovie] = useState({});
+  const [isShowModal, setIsShowModal] = useState(false);
 
   const getUserData = async (uid) => {
     const result = await get(child(dbRef, `user-movies/${uid}`));
@@ -94,6 +97,11 @@ export default function Home({ navigation }) {
     getAnotherUsersData();
   }, [sameUsers]);
 
+  const showOverview = (movie) => {
+    if (movie) setSelectMovie(movie);
+    setIsShowModal(!isShowModal);
+  };
+
   return (
     <>
       {isLoading ? (
@@ -117,6 +125,7 @@ export default function Home({ navigation }) {
                 name={userName}
                 favorites={movies}
                 isOnlyImg={false}
+                showOverview={showOverview}
               />
               <View
                 style={{
@@ -180,6 +189,11 @@ export default function Home({ navigation }) {
           <MenuTap key={menu.id} title={menu.title} navigation={navigation} />
         ))}
       </View>
+      <OverviewModal
+        movie={selectMovie}
+        showOverview={showOverview}
+        state={isShowModal}
+      />
     </>
   );
 }

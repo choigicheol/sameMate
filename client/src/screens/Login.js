@@ -144,7 +144,7 @@ export default function Login({ navigation }) {
         ) : (
           <>
             <View style={styles.titleBox}>
-              <Text style={styles.title}>Same Mate</Text>
+              <Text style={styles.title}>추천좀</Text>
             </View>
             <View style={styles.inputBox}>
               <Text style={styles.loginText}>ID</Text>

@@ -12,7 +12,11 @@ import { menus } from "../../dummy/data";
 import MenuTap from "../components/MenuTap";
 import axios from "axios";
 import SearchResult from "../components/SearchResult";
-import { NAVER_API_CLIENT_ID, NAVER_API_CLIENT_KEY } from "react-native-dotenv";
+import {
+  NAVER_API_CLIENT_ID,
+  NAVER_API_CLIENT_KEY,
+  TMDB_API_KEY,
+} from "react-native-dotenv";
 import { db } from "../../firebaseConfig";
 import { ref, update } from "firebase/database";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,45 +28,42 @@ export default function Search({ navigation }) {
   const disPatch = useDispatch();
   const [searchMovies, setSearchMovies] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  // const extractTextPattern = /(<([^>]+)>)/gi;
   const userUid = useSelector((state) => state.user.uid);
   const userMovies = useSelector((state) => state.movie.movie_list);
-
+  const [searchCategory, setSearchCategory] = useState("movie");
   const [modalVisible, setModalVisible] = useState(false);
+  const [totalResults, setTotalResults] = useState(0);
+
   const getMovies = async (word) => {
     if (word.length > 1) {
       setIsSearching(true);
       const result = await axios.get(
-        `https://openapi.naver.com/v1/search/movie.json?query=${word}&display=100`,
-        {
-          headers: {
-            "X-Naver-Client-Id": NAVER_API_CLIENT_ID,
-            "X-Naver-Client-Secret": NAVER_API_CLIENT_KEY,
-          },
-        }
+        // `https://openapi.naver.com/v1/search/movie.json?query=${word}&display=100`,
+        `https://api.themoviedb.org/3/search/${searchCategory}?api_key=${TMDB_API_KEY}&page=1&query=${word}&language=ko-KR&include_adult=false`
       );
 
       if (result.data) {
-        setSearchMovies(result.data.items);
+        setSearchMovies(result.data.results);
+        setTotalResults(result.data.total_results);
       }
       setIsSearching(false);
     }
   };
 
-  const addUserMovie = async (data) => {
+  const addUserMovie = async (movie) => {
     if (userMovies.length >= 10) {
       setModalVisible(true);
     } else {
       const updates = {};
-      const title = data.title;
-      const actors = data.actor;
-      const movieHash = await GetMovieHash(title, actors);
+      const title = movie.title;
+      const releaseDate = movie.release_date;
+      const movieHash = await GetMovieHash(title, releaseDate);
       if (movieHash) {
         updates["/all-movies/" + movieHash + "/" + userUid] = true;
-        updates["/user-movies/" + userUid + "/" + movieHash] = data;
+        updates["/user-movies/" + userUid + "/" + movieHash] = movie;
         update(ref(db), updates);
       }
-      disPatch(addMovie([data]));
+      disPatch(addMovie([movie]));
     }
   };
 
@@ -88,7 +89,7 @@ export default function Search({ navigation }) {
         <View style={styles.resultCountBox}>
           <Text style={styles.resultCount}>검색 결과</Text>
           <Text style={[styles.resultCount, styles.number]}>
-            {searchMovies.length}
+            {totalResults}
           </Text>
           <Text style={styles.resultCount}>개</Text>
         </View>

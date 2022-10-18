@@ -15,7 +15,7 @@ export const movieSlice = createSlice({
     addMovie: (state, action) => {
       state.movie_list = [...action.payload, ...state.movie_list];
     },
-    deleteMovie: (state, action) => {
+    deleteMovies: (state, action) => {
       state.movie_list = state.movie_list.filter(
         (movie) => movie.title !== action.payload.title
       );

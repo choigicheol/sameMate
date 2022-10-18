@@ -15,20 +15,18 @@ export default function PosterList({
   isOnlyImg,
   isDelete,
   isEditMode,
+  showOverview,
 }) {
   return (
     <>
       <View
         style={{
-          // width: 80,
           marginLeft: 5,
-          // justifyContent: "center",
           alignItems: "center",
           flexDirection: "row",
         }}
       >
         {name ? <Text style={styles.userName}>{name}</Text> : <></>}
-        {/* <Text style={styles.userText}>님의 리스트</Text> */}
       </View>
       <View style={styles.userContainer}>
         <ScrollView
@@ -39,11 +37,12 @@ export default function PosterList({
           {favorites.length ? (
             favorites.map((favorite, idx) => (
               <Poster
-                data={favorite}
+                movie={favorite}
                 key={idx}
                 isOnlyImg={isOnlyImg}
                 isEditMode={isEditMode}
                 isDelete={isDelete}
+                showOverview={showOverview}
               />
             ))
           ) : (

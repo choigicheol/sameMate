@@ -1,47 +1,48 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View, Image, Text, TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteMovie } from "../redux/slice/movieSlice";
+import { deleteMovies } from "../redux/slice/movieSlice";
 import { windowWidth } from "../util/WH";
 import { db } from "../../firebaseConfig";
 import { GetMovieHash } from "../util/Functions";
 
 export default function Poster({
-  data,
+  movie,
   isOnlyImg = true,
   isDelete,
   isEditMode,
+  showOverview,
 }) {
-  const extractTextPattern = /(<([^>]+)>)/gi;
   const [isSelect, setIsSelect] = useState(false);
   const dispatch = useDispatch();
   const userUid = useSelector((state) => state.user.uid);
 
-  const getHash = async () => {
+  const deleteMovie = async () => {
     if (isSelect) {
-      const movieHash = await GetMovieHash(data.title, data.actor);
+      const movieHash = await GetMovieHash(movie.title, movie.release_date);
       await db.ref(`user-movies/${userUid}/${movieHash}`).remove();
       await db.ref(`all-movies/${movieHash}/${userUid}`).remove();
-      dispatch(deleteMovie(data));
+      dispatch(deleteMovies(movie));
       setIsSelect(false);
     }
   };
 
   const pressImgSelect = () => {
     if (isEditMode) setIsSelect(!isSelect);
+    else showOverview(movie);
   };
 
   useEffect(() => {
-    getHash();
+    deleteMovie();
   }, [isDelete]);
 
   useEffect(() => {
     if (isEditMode) setIsSelect(false);
   }, [isEditMode]);
-
+  console.log(movie);
   return (
     <View style={styles.container}>
-      {data.image ? (
+      {typeof movie === "object" ? (
         <>
           {isEditMode && (
             <TouchableOpacity
@@ -65,50 +66,30 @@ export default function Poster({
             style={{ width: "100%" }}
             onPress={() => pressImgSelect()}
           >
-            <Image
-              style={styles.posterImage}
-              source={{
-                uri: data.image,
-              }}
-            />
+            {movie.poster_path ? (
+              <Image
+                style={styles.posterImage}
+                source={{
+                  uri: `https://image.tmdb.org/t/p/original${movie.poster_path}`,
+                }}
+              />
+            ) : (
+              <Image
+                style={styles.posterImage}
+                source={{
+                  uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3D-lTi8YdxLGtoKSdAQXPwmFSnjfZCDNFsQ&usqp=CAU",
+                }}
+              />
+            )}
           </TouchableOpacity>
         </>
       ) : (
-        <>
-          {isEditMode && (
-            <TouchableOpacity
-              style={{ width: "100%", alignItems: "center" }}
-              onPress={() => setIsSelect(!isSelect)}
-            >
-              <View
-                style={
-                  isSelect ? styles.deleteButtonSelect : styles.deleteButton
-                }
-              >
-                <Text
-                  style={{ fontWeight: "bold", fontSize: 16, color: "#ffffff" }}
-                >
-                  ✔︎
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity
-            style={{ width: "100%" }}
-            onPress={() => pressImgSelect()}
-          >
-            <Image
-              style={styles.posterImage}
-              source={{
-                uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3D-lTi8YdxLGtoKSdAQXPwmFSnjfZCDNFsQ&usqp=CAU",
-              }}
-            />
-          </TouchableOpacity>
-        </>
+        <></>
       )}
-      {data.title !== undefined && !isOnlyImg ? (
+
+      {typeof movie === "object" && movie.title !== undefined && !isOnlyImg ? (
         <Text style={styles.posterTitle} numberOfLines={2}>
-          {data.title.replace(extractTextPattern, "")}
+          {movie.title}
         </Text>
       ) : (
         <></>

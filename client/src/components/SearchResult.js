@@ -4,25 +4,25 @@ import OverFlowText from "./OverFlowText";
 import Poster from "./Poster";
 
 export default function SearchResult({ movie, addUserMovie }) {
-  const extractTextPattern = /(<([^>]+)>)/gi;
   const category = {
     title: "제목 : ",
-    pubDate: "개봉 : ",
-    director: "감독 : ",
-    actor: "출연 : ",
+    release_date: "개봉 : ",
+    vote_average: "평점 : ",
+    overview: "줄거리 : ",
   };
   const arrCategories = Object.keys(category);
   return (
     <View style={styles.resultContainer}>
-      <Poster data={movie} />
+      <Poster movie={movie} />
       <View style={styles.resultInfo}>
         {arrCategories.map((cate, idx) => {
           return (
             <OverFlowText
               category={category[cate]}
-              text={movie[cate].replace(extractTextPattern, "")}
+              text={movie[cate]}
               style={styles.resultInfoText}
               key={idx}
+              name={cate}
             ></OverFlowText>
           );
         })}

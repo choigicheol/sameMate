@@ -1,6 +1,5 @@
 import React from "react";
 import { StyleSheet, View, Image, Text, TouchableOpacity } from "react-native";
-import { windowWidth } from "../util/WH";
 
 export default function MenuTap({ title, navigation }) {
   return (

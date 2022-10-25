@@ -1,15 +1,14 @@
 {
   "expo": {
-    "name": "client",
-    "slug": "client",
+    "name": "모두의 추천목록",
+    "slug": "similarmate",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "",
-    "userInterfaceStyle": "light",
+    "icon": "./src/assets/logo.png",
     "splash": {
-      "image": "",
+      "image": "./src/assets/splash_image.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -19,10 +18,17 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.gigichoi.client",
-      "googleServicesFile": "./google-services.json"
+      "package": "com.gigichoi.similarmate",
+      "googleServicesFile": "./google-services.json",
+      "icon": "./src/assets/appLogo.png",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#000000",
+        "foregroundImage": "./src/assets/appLogo.png"
+      },
+      "permissions": []
     },
-    "scheme": "com.gigichoi.client",
+    "scheme": "com.gigichoi.similarmate",
     "web": {
       "favicon": ""
     },

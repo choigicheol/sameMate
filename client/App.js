@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Text } from "react-native";
 import Navigation from "./src/navigation/Navigation";
@@ -8,7 +8,29 @@ import { store } from "./src/redux/store/store";
 import { Provider } from "react-redux";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-// import "react-native-gesture-handler";
+import {
+  API_KEY,
+  AUTH_DOMAIN,
+  PROJECT_ID,
+  STORAGE_BUCKET,
+  MESSAGING_SENDER_ID,
+  APP_ID,
+  MEASUREMENT_ID,
+  DATABASE_URL,
+} from "react-native-dotenv";
+
+import { initializeApp } from "firebase/app";
+
+initializeApp({
+  apiKey: API_KEY,
+  authDomain: AUTH_DOMAIN,
+  projectId: PROJECT_ID,
+  storageBucket: STORAGE_BUCKET,
+  messagingSenderId: MESSAGING_SENDER_ID,
+  appId: APP_ID,
+  measurementId: MEASUREMENT_ID,
+  databaseURL: DATABASE_URL,
+});
 
 const queryClient = new QueryClient();
 
@@ -20,12 +42,12 @@ export default function App() {
   useEffect(() => {
     async function prepare() {
       await SplashScreen.preventAutoHideAsync();
-      if (fontsLoaded) {
+      setTimeout(async () => {
         await SplashScreen.hideAsync();
-      }
+      }, 500);
     }
     prepare();
-  }, [fontsLoaded]);
+  }, []);
 
   return (
     <Provider store={store}>

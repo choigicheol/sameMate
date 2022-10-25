@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteMovies } from "../redux/slice/movieSlice";
 import { windowWidth } from "../util/WH";
 import { db } from "../../firebaseConfig";
-import { GetMovieHash } from "../util/Functions";
 
 export default function Poster({
   movie,
@@ -19,9 +18,8 @@ export default function Poster({
 
   const deleteMovie = async () => {
     if (isSelect) {
-      const movieHash = await GetMovieHash(movie.title, movie.release_date);
-      await db.ref(`user-movies/${userUid}/${movieHash}`).remove();
-      await db.ref(`all-movies/${movieHash}/${userUid}`).remove();
+      await db.ref(`userMovies/${userUid}/${movie.id}`).remove();
+      await db.ref(`allMovies/${movie.id}/${userUid}`).remove();
       dispatch(deleteMovies(movie));
       setIsSelect(false);
     }

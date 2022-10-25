@@ -14,7 +14,8 @@ import WarningMessage from "../components/WarningMessage";
 import { windowHeight, windowWidth } from "../util/WH";
 import { db } from "../../firebaseConfig";
 import { ref, update } from "firebase/database";
-import { CheckEmail, GetHash } from "../util/Functions";
+import { GetHash } from "../util/Functions";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 function Signup({ navigation }) {
   const [email, setEmail] = useState("");
@@ -29,11 +30,12 @@ function Signup({ navigation }) {
   });
   const [isSuccess, setIsSuccess] = useState(false);
   const dbRef = ref(db);
+  const auth = getAuth();
   const regExp = new RegExp(
     /^([0-9a-zA-Z_\.-]+)@([0-9a-zA-Z_-]+)(\.[0-9a-zA-Z_-]+){1,2}$/
   );
 
-  const userSignup = async () => {
+  const registration = async () => {
     const initWarning = {
       email: false,
       blank: false,
@@ -44,30 +46,35 @@ function Signup({ navigation }) {
       blank: false,
       password: false,
     });
-    const hashEmail = await GetHash(email);
 
     if (!email || !name || !password || !passwordConfirm) {
       initWarning.blank = true;
+      setIsWarning(initWarning);
     } else if (password !== passwordConfirm) {
       initWarning.password = true;
+      setIsWarning(initWarning);
     } else {
-      if (await CheckEmail(hashEmail)) {
-        initWarning.email = true;
-      } else {
-        setIsSuccess(true);
-        const hashPassword = await GetHash(password);
-        const userInfo = {};
-        userInfo[`/users/${hashEmail}`] = {
-          email,
-          displayName: name,
-          password: hashPassword,
-        };
-        update(dbRef, userInfo);
-        setIsSuccess(false);
-        navigation.navigate("Login");
-      }
+      const hashPassword = await GetHash(password);
+      createUserWithEmailAndPassword(auth, email, hashPassword)
+        .then((data) => {
+          setIsSuccess(true);
+          const updates = {};
+          const uid = data.user.uid;
+          updates["/users/" + uid] = {
+            displayName: name,
+            uid,
+          };
+          update(dbRef, updates);
+          setIsSuccess(false);
+          navigation.navigate("Login");
+        })
+        .catch((error) => {
+          if (error.code === "auth/email-already-in-use") {
+            initWarning.email = true;
+            setIsWarning(initWarning);
+          }
+        });
     }
-    setIsWarning(initWarning);
   };
 
   const checkValidEmail = () => {
@@ -176,7 +183,7 @@ function Signup({ navigation }) {
                 <TouchableOpacity
                   style={styles.signupButton}
                   onPress={() => {
-                    userSignup();
+                    registration();
                   }}
                 >
                   <Text style={styles.signupButtonText}>가입하기</Text>

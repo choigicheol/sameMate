@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
-  ScrollView,
   StyleSheet,
   ActivityIndicator,
   FlatList,
@@ -13,17 +12,14 @@ import { menus } from "../../dummy/data";
 import MenuTap from "../components/MenuTap";
 import axios from "axios";
 import SearchResult from "../components/SearchResult";
-import {
-  NAVER_API_CLIENT_ID,
-  NAVER_API_CLIENT_KEY,
-  TMDB_API_KEY,
-} from "react-native-dotenv";
+import { TMDB_API_KEY } from "react-native-dotenv";
 import { db } from "../../firebaseConfig";
 import { ref, update } from "firebase/database";
 import { useDispatch, useSelector } from "react-redux";
 import { addMovie } from "../redux/slice/movieSlice";
 import { TwoButtonModal } from "../components/TwoButtonModal";
-import { GetMovieHash } from "../util/Functions";
+import { getAuth } from "firebase/auth";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Search({ navigation }) {
   const disPatch = useDispatch();
@@ -37,6 +33,9 @@ export default function Search({ navigation }) {
   const [page, setPage] = useState(1);
   const [searchWord, setSearchWord] = useState("");
   const [isAddModal, setIsAddModal] = useState(false);
+  const dbRef = ref(db);
+  const auth = getAuth();
+  const [updates, setUpdates] = useState({});
 
   const getMovies = async (word) => {
     if (word.length > 1) {
@@ -87,21 +86,22 @@ export default function Search({ navigation }) {
       setModalVisible(true);
     } else {
       setIsAddModal(true);
-      const updates = {};
-      const title = movie.title;
-      const releaseDate = movie.release_date;
-      const movieHash = await GetMovieHash(title, releaseDate);
-      if (movieHash) {
-        updates["/all-movies/" + movieHash + "/" + userUid] = true;
-        updates["/user-movies/" + userUid + "/" + movieHash] = movie;
-        update(ref(db), updates);
-      }
-      disPatch(addMovie([movie]));
+      updates[`/userMovies/${userUid}/${movie.id}`] = movie;
+      updates[`/allMovies/${movie.id}/${userUid}`] = true;
+      disPatch(addMovie(movie));
       setTimeout(() => {
         setIsAddModal(false);
       }, 300);
     }
   };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        update(dbRef, updates);
+      };
+    }, [])
+  );
 
   const modalCheckButton = () => {
     setModalVisible(false);

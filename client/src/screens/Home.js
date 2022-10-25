@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -12,17 +12,14 @@ import MenuTap from "../components/MenuTap";
 import { menus } from "../../dummy/data";
 import PosterList from "../components/PosterList";
 import { db } from "../../firebaseConfig";
-import { getDatabase, ref, child, get } from "firebase/database";
+import { ref, child, get } from "firebase/database";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  setMovie,
-  deleteMovie,
-  setSameUserData,
-} from "../redux/slice/movieSlice";
-
+import { setMovie, setSameUserData } from "../redux/slice/movieSlice";
 import { setSameUserList } from "../redux/slice/userSlice";
 import { windowHeight } from "../util/WH";
 import { OverviewModal } from "../components/OverviewModal";
+import { getAuth } from "firebase/auth";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Home({ navigation }) {
   const dispatch = useDispatch();
@@ -35,57 +32,59 @@ export default function Home({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectMovie, setSelectMovie] = useState({});
   const [isShowModal, setIsShowModal] = useState(false);
+  const auth = getAuth();
+  const [userMovieKeys, setUserMovieKeys] = useState([]);
 
-  const getUserData = async (uid) => {
-    const result = await get(child(dbRef, `user-movies/${uid}`));
-    const data = [];
-    if (result.exists()) {
-      const movies = result.val();
-      Object.keys(movies).map((el) => {
-        data.push(movies[el]);
-      });
-    }
-    dispatch(setMovie(data));
-  };
-
-  const getSameUsersUid = async () => {
+  const setSameUsersUid = async () => {
     const result = new Set();
-    const getMovies = await get(child(dbRef, `user-movies/${userUid}`));
-    if (getMovies.exists()) {
-      const moviesVal = getMovies.val();
-      const movieKeys = Object.keys(moviesVal);
-
-      for (let i = 0; i < movieKeys.length; i++) {
-        const users = await get(child(dbRef, `all-movies/${movieKeys[i]}`));
-        if (users.exists()) {
-          const objUsers = users.val();
-          const usersKey = Object.keys(objUsers).filter(
-            (key) => key !== userUid
-          );
-          usersKey.map((el) => result.add(el));
-        }
+    for (let i = 0; i < userMovieKeys.length; i++) {
+      const users = await get(child(dbRef, `allMovies/${userMovieKeys[i]}`));
+      if (users.exists()) {
+        const objUsers = users.val();
+        Object.keys(objUsers)
+          .filter((key) => key !== userUid)
+          .map((el) => result.add(el));
       }
     }
-
     const arrResult = Array.from(result);
     dispatch(setSameUserList(arrResult));
+    if (!arrResult.length) setIsLoading(false);
   };
 
-  useEffect(() => {
-    setIsLoading(true);
-    getSameUsersUid(movies);
-    getUserData(userUid);
-  }, [userUid, movies.length]);
+  const getUserData = async (uid) => {
+    const result = await get(child(dbRef, `userMovies/${uid}`));
+    const data = [];
+    const keys = [];
+    if (result.exists()) {
+      const movies = result.val();
+      for (let key in movies) {
+        data.push(movies[key]);
+        keys.push(key);
+      }
+      setUserMovieKeys(keys);
+      dispatch(setMovie(data));
+    } else {
+      setIsLoading(false);
+    }
+  };
 
-  const getAnotherUsersData = async () => {
+  useFocusEffect(
+    React.useCallback(() => {
+      setIsLoading(true);
+      getUserData(userUid);
+    }, [])
+  );
+
+  const getSameUserData = async () => {
+    console.log(sameUsers, "same");
     const data = [];
     for (let i = 0; i < sameUsers.length; i++) {
-      const userDb = await get(child(dbRef, `user-movies/${sameUsers[i]}`));
-      const userName = await get(child(dbRef, `userName/${sameUsers[i]}`));
+      const userDb = await get(child(dbRef, `userMovies/${sameUsers[i]}`));
+      const userName = await get(child(dbRef, `users/${sameUsers[i]}`));
       if (userDb.exists()) {
         const movies = userDb.val();
         const arrMovies = Object.keys(movies).map((el) => movies[el]);
-        const name = userName.val();
+        const name = userName.val().displayName;
         data.push([name, arrMovies]);
       }
     }
@@ -94,8 +93,13 @@ export default function Home({ navigation }) {
   };
 
   useEffect(() => {
-    getAnotherUsersData();
+    console.log("new");
+    getSameUserData();
   }, [sameUsers]);
+
+  useEffect(() => {
+    setSameUsersUid();
+  }, [userMovieKeys]);
 
   const showOverview = (movie) => {
     if (movie) setSelectMovie(movie);

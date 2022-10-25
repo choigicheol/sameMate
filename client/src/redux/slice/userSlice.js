@@ -32,7 +32,7 @@ const userSlice = createSlice({
       state.accessToken = action.payload;
     },
     setSameUserList(state, action) {
-      state.sameUserList = [...action.payload];
+      state.sameUserList = action.payload;
     },
     userSliceReset(state) {
       state.uid = "";

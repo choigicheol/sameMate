@@ -13,7 +13,7 @@ export const movieSlice = createSlice({
       state.movie_list = [...action.payload];
     },
     addMovie: (state, action) => {
-      state.movie_list = [...action.payload, ...state.movie_list];
+      state.movie_list = [action.payload, ...state.movie_list];
     },
     deleteMovies: (state, action) => {
       state.movie_list = state.movie_list.filter(

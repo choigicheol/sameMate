@@ -17,6 +17,8 @@ import {
   GoogleAuthProvider,
   signInWithCredential,
   onAuthStateChanged,
+  signOut,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { setUser } from "../redux/slice/userSlice";
 import { useDispatch } from "react-redux";
@@ -28,19 +30,7 @@ import {
 } from "react-native-dotenv";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import { initializeApp } from "firebase/app";
-import { CheckEmail, GetHash } from "../util/Functions";
-
-initializeApp({
-  apiKey: "AIzaSyBxN4EyG1xSXOp5zWKBS-svPd93RUVZtCQ",
-  authDomain: "samemate-ee922.firebaseapp.com",
-  projectId: "samemate-ee922",
-  storageBucket: "samemate-ee922.appspot.com",
-  messagingSenderId: "320208000348",
-  appId: "1:320208000348:web:6489535f23dfd414c15d99",
-  measurementId: "G-2WLXW23624",
-  databaseURL: "https://samemate-ee922-default-rtdb.firebaseio.com/",
-});
+import { GetHash } from "../util/Functions";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -73,61 +63,68 @@ export default function Login({ navigation }) {
     }
   }, [response]);
 
-  const setUserName = (uid, displayName) => {
+  const setUserInfo = (uid, displayName, userMovies = []) => {
     const updates = {};
-    updates["/userName/" + uid] = displayName;
+    updates["/users/" + uid] = { displayName, uid, userMovies };
     update(dbRef, updates);
+  };
+
+  const setUserState = (uid, email, displayName, accessToken, loginType) => {
+    dispatch(
+      setUser({
+        uid,
+        email,
+        name: displayName,
+        accessToken,
+        isLogin: true,
+        loginType,
+      })
+    );
   };
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       let { uid, email, displayName, accessToken } = user;
-      get(child(dbRef, `userName/${uid}`)).then((data) => {
-        if (data.exists()) {
-          const userName = data.val();
-          displayName = userName;
-        } else {
-          setUserName(uid, displayName);
+      if (!!displayName) {
+        const dbDisplayName = await get(child(dbRef, `users/${uid}`));
+
+        if (dbDisplayName.exists()) {
+          displayName = dbDisplayName.val().displayName;
         }
-        dispatch(
-          setUser({
-            uid,
-            email,
-            name: displayName,
-            accessToken,
-            isLogin: true,
-            loginType: "google",
-          })
-        );
-      });
-      navigation.navigate("Home");
-      setIsEnter(false);
+
+        setUserState(uid, email, displayName, accessToken, "google");
+        setUserInfo(uid, displayName);
+        setIsEnter(false);
+        navigation.navigate("Home");
+      }
     }
   });
 
   const userSignIn = async () => {
     setIsWarning(false);
-    const hashEmail = await GetHash(email);
-    if (await CheckEmail(hashEmail)) {
-      const inputPassword = await GetHash(password);
-      const dbUserInfo = await get(child(dbRef, `users/${hashEmail}`));
-      const userInfoValue = dbUserInfo.val();
-      if (userInfoValue.password === inputPassword) {
-        const { email, displayName, accessToken } = userInfoValue;
-        dispatch(
-          setUser({
-            uid: hashEmail,
-            email,
-            name: displayName,
-            accessToken,
-            isLogin: true,
-            loginType: "init",
+    const hashPassword = await GetHash(password);
+    const auth = getAuth();
+
+    signInWithEmailAndPassword(auth, email, hashPassword)
+      .then((userCredential) => {
+        setIsEnter(true);
+        const user = userCredential.user;
+        const { uid, email, accessToken } = user;
+        get(child(dbRef, `users/${uid}`))
+          .then((data) => {
+            if (data.exists()) {
+              const displayName = data.val().displayName;
+              setUserState(uid, email, displayName, accessToken, "init");
+            }
           })
-        );
-        setUserName(hashEmail, displayName);
-        navigation.navigate("Home");
-      }
-    } else setIsWarning(true);
+          .then(() => {
+            setIsEnter(false);
+            navigation.navigate("Home");
+          });
+      })
+      .catch((error) => {
+        setIsWarning(true);
+      });
   };
 
   return (
@@ -144,7 +141,7 @@ export default function Login({ navigation }) {
         ) : (
           <>
             <View style={styles.titleBox}>
-              <Text style={styles.title}>SameMate</Text>
+              <Text style={styles.title}>Similar Mate</Text>
             </View>
             <View style={styles.inputBox}>
               <Text style={styles.loginText}>ID</Text>

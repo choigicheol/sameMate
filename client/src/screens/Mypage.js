@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { menus } from "../../dummy/data";
 import MenuTap from "../components/MenuTap";
 import { setName, userSliceReset } from "../redux/slice/userSlice";
-import { movieSliceReset, deleteMovie } from "../redux/slice/movieSlice";
+import { movieSliceReset } from "../redux/slice/movieSlice";
 import { getAuth, signOut } from "firebase/auth";
 import PosterList from "../components/PosterList";
 import { ref, update } from "firebase/database";
@@ -28,6 +28,7 @@ export default function Mypage({ navigation }) {
   const [editName, setEditName] = useState(userName);
   const dbRef = ref(db);
   const loginType = useSelector((state) => state.user.loginType);
+
   const setLogout = () => {
     const auth = getAuth();
     signOut(auth)
@@ -56,14 +57,11 @@ export default function Mypage({ navigation }) {
   const updateUserName = () => {
     dispatch(setName(editName));
     const updates = {};
-    console.log(loginType);
-    updates[`/userName/${userUid}`] = editName;
-    if (loginType === "init") {
-      updates[`/users/${userUid}/displayName`] = editName;
-    }
+    updates[`/users/${userUid}/displayName`] = editName;
     update(dbRef, updates);
     setIsEditName(false);
   };
+
   return (
     <>
       <View style={styles.container}>

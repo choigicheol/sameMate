@@ -4,18 +4,15 @@ import Login from "../screens/Login";
 import Home from "../screens/Home";
 import Search from "../screens/Search";
 import Mypage from "../screens/Mypage";
-import { useSelector } from "react-redux";
 import Signup from "../screens/Signup";
 
 const Stack = createNativeStackNavigator();
 
 export default function Navigation() {
-  const isLogin = useSelector((state) => state.user.isLogin);
-
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={isLogin ? "Home" : "Login"}
+        initialRouteName={"Login"}
         screenOptions={{ headerShown: false }}
       >
         <Stack.Screen name="Login" component={Login} />

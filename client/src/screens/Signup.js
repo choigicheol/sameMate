@@ -66,7 +66,9 @@ function Signup({ navigation }) {
           };
           update(dbRef, updates);
           setIsSuccess(false);
-          navigation.navigate("Login");
+          navigation.reset({
+            routes: [{ name: "Login" }],
+          });
         })
         .catch((error) => {
           if (error.code === "auth/email-already-in-use") {

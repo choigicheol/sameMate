@@ -21,7 +21,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { setUser } from "../redux/slice/userSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { get, ref, update, child } from "firebase/database";
 import { db } from "../../firebaseConfig";
 import {
@@ -31,6 +31,7 @@ import {
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { GetHash } from "../util/Functions";
+import { useFocusEffect } from "@react-navigation/native";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -39,6 +40,7 @@ export default function Login({ navigation }) {
   const [password, setPassword] = useState("");
   const [isEnter, setIsEnter] = useState(false);
   const [isWarning, setIsWarning] = useState(false);
+  const isLogin = useSelector((state) => state.user.isLogin);
 
   const dispatch = useDispatch();
 
@@ -95,7 +97,9 @@ export default function Login({ navigation }) {
         setUserState(uid, email, displayName, accessToken, "google");
         setUserInfo(uid, displayName);
         setIsEnter(false);
-        navigation.navigate("Home");
+        navigation.reset({
+          routes: [{ name: "Home" }],
+        });
       }
     }
   });
@@ -119,7 +123,9 @@ export default function Login({ navigation }) {
           })
           .then(() => {
             setIsEnter(false);
-            navigation.navigate("Home");
+            navigation.reset({
+              routes: [{ name: "Home" }],
+            });
           });
       })
       .catch((error) => {

@@ -20,6 +20,7 @@ import { windowHeight } from "../util/WH";
 import { OverviewModal } from "../components/OverviewModal";
 import { getAuth } from "firebase/auth";
 import { useFocusEffect } from "@react-navigation/native";
+import CountButton from "../components/CountButton";
 
 export default function Home({ navigation }) {
   const dispatch = useDispatch();
@@ -34,21 +35,30 @@ export default function Home({ navigation }) {
   const [isShowModal, setIsShowModal] = useState(false);
   const auth = getAuth();
   const [userMovieKeys, setUserMovieKeys] = useState([]);
+  const [count, setCount] = useState(1);
+  const [isReScan, setIsReScan] = useState(false);
 
   const setSameUsersUid = async () => {
-    const result = new Set();
+    const result = {};
+    let resultNum = 0;
     for (let i = 0; i < userMovieKeys.length; i++) {
       const users = await get(child(dbRef, `allMovies/${userMovieKeys[i]}`));
       if (users.exists()) {
         const objUsers = users.val();
         Object.keys(objUsers)
           .filter((key) => key !== userUid)
-          .map((el) => result.add(el));
+          .map((el) => {
+            if (result[el]) {
+              result[el]++;
+            } else {
+              result[el] = 1;
+              resultNum++;
+            }
+          });
       }
     }
-    const arrResult = Array.from(result);
-    dispatch(setSameUserList(arrResult));
-    if (!arrResult.length) setIsLoading(false);
+    dispatch(setSameUserList(result));
+    if (!resultNum) setIsLoading(false);
   };
 
   const getUserData = async (uid) => {
@@ -70,30 +80,33 @@ export default function Home({ navigation }) {
 
   useFocusEffect(
     React.useCallback(() => {
-      setIsLoading(true);
       getUserData(userUid);
+      setCount(1);
     }, [])
   );
 
   const getSameUserData = async () => {
-    console.log(sameUsers, "same");
+    setIsReScan(true);
     const data = [];
-    for (let i = 0; i < sameUsers.length; i++) {
-      const userDb = await get(child(dbRef, `userMovies/${sameUsers[i]}`));
-      const userName = await get(child(dbRef, `users/${sameUsers[i]}`));
-      if (userDb.exists()) {
-        const movies = userDb.val();
-        const arrMovies = Object.keys(movies).map((el) => movies[el]);
-        const name = userName.val().displayName;
-        data.push([name, arrMovies]);
+    for (let key in sameUsers) {
+      if (Number(sameUsers[key]) >= count) {
+        const userDb = await get(child(dbRef, `userMovies/${key}`));
+        const userName = await get(child(dbRef, `users/${key}`));
+        if (userDb.exists()) {
+          const movies = userDb.val();
+          const arrMovies = Object.keys(movies).map((el) => movies[el]);
+          const name = userName.val().displayName;
+          data.push([name, arrMovies]);
+        }
       }
     }
+
     dispatch(setSameUserData(data));
     setIsLoading(false);
+    setIsReScan(false);
   };
 
   useEffect(() => {
-    console.log("new");
     getSameUserData();
   }, [sameUsers]);
 
@@ -104,6 +117,11 @@ export default function Home({ navigation }) {
   const showOverview = (movie) => {
     if (movie) setSelectMovie(movie);
     setIsShowModal(!isShowModal);
+  };
+
+  const counter = (type) => {
+    if (type === "plus" && count < movies.length) setCount(count + 1);
+    else if (type === "minus" && count > 1) setCount(count - 1);
   };
 
   return (
@@ -138,6 +156,42 @@ export default function Home({ navigation }) {
                 }}
               >
                 <Text style={styles.recommendationList}>추천 목록 🗒</Text>
+              </View>
+              <View
+                style={[
+                  styles.centeredView,
+                  {
+                    marginBottom: 10,
+                  },
+                ]}
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontSize: 12,
+                    borderBottomWidth: 1,
+                    borderColor: "#ffffff",
+                  }}
+                >
+                  {"최소 일치 개수"}
+                </Text>
+              </View>
+              <View style={[styles.centeredView, { flexDirection: "row" }]}>
+                <CountButton
+                  imageSrc={require("../assets/minus_icon.png")}
+                  btnFunc={() => counter("minus")}
+                />
+                <Text style={{ color: "#ffffff", fontSize: 30 }}>{count}</Text>
+                <CountButton
+                  imageSrc={require("../assets/plus_icon.png")}
+                  btnFunc={() => counter("plus")}
+                />
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  onPress={() => getSameUserData()}
+                >
+                  <Text style={{ color: "#ffffff" }}>{"확인"}</Text>
+                </TouchableOpacity>
               </View>
             </>
           ) : (
@@ -178,15 +232,21 @@ export default function Home({ navigation }) {
               </View>
             </>
           )}
-          {sameUserMovies.map((data, idx) => (
-            <PosterList
-              key={idx}
-              name={data[0]}
-              favorites={data[1]}
-              isOnlyImg={false}
-              showOverview={showOverview}
-            />
-          ))}
+          {isReScan ? (
+            <View style={styles.centeredView}>
+              <ActivityIndicator size="large" color="tomato" />
+            </View>
+          ) : (
+            sameUserMovies.map((data, idx) => (
+              <PosterList
+                key={idx}
+                name={data[0]}
+                favorites={data[1]}
+                isOnlyImg={false}
+                showOverview={showOverview}
+              />
+            ))
+          )}
           {!sameUserMovies.length && !!movies.length && (
             <View style={styles.centeredView}>
               <Text style={{ color: "#ffffff", marginTop: 20, fontSize: 16 }}>
@@ -229,7 +289,7 @@ const styles = StyleSheet.create({
     borderColor: "#ffffff",
     fontWeight: "bold",
     color: "#ffffff",
-    fontSize: 20,
+    fontSize: 26,
     marginBottom: 10,
     marginTop: 10,
     paddingBottom: 10,
@@ -251,5 +311,13 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontWeight: "bold",
     fontSize: 20,
+  },
+  confirmButton: {
+    backgroundColor: "#32AAFF",
+    borderRadius: 5,
+    width: 40,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

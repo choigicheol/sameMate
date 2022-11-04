@@ -5,9 +5,10 @@ const initialState = {
   name: "",
   email: "",
   accessToken: "",
-  sameUserList: [],
+  sameUserList: {},
   isLogin: false,
   loginType: "",
+  searchType: "movie",
 };
 
 const userSlice = createSlice({
@@ -42,6 +43,10 @@ const userSlice = createSlice({
       state.sameUserList = [];
       state.isLogin = false;
       state.loginType = "";
+      state.searchType = null;
+    },
+    setSearchType(state, action) {
+      state.searchType = action.payload;
     },
   },
   //extraReducer는 비동기 액션 생성시 필요
@@ -55,5 +60,6 @@ export const {
   setAccessToken,
   setSameUserList,
   userSliceReset,
+  setSearchType,
 } = userSlice.actions;
 export default userSlice.reducer;

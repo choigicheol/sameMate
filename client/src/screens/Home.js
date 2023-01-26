@@ -18,9 +18,9 @@ import { setMovie, setSameUserData } from "../redux/slice/movieSlice";
 import { setSameUserList } from "../redux/slice/userSlice";
 import { windowHeight } from "../util/WH";
 import { OverviewModal } from "../components/OverviewModal";
-import { getAuth } from "firebase/auth";
 import { useFocusEffect } from "@react-navigation/native";
 import CountButton from "../components/CountButton";
+import HamburgerButton from "../components/HamburgerButton";
 
 export default function Home({ navigation }) {
   const dispatch = useDispatch();
@@ -33,14 +33,16 @@ export default function Home({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectMovie, setSelectMovie] = useState({});
   const [isShowModal, setIsShowModal] = useState(false);
-  const auth = getAuth();
   const [userMovieKeys, setUserMovieKeys] = useState([]);
   const [count, setCount] = useState(1);
   const [isReScan, setIsReScan] = useState(false);
+  const [sameDataNum, setSameDataNum] = useState(10);
+  const isOptionModal = useSelector((state) => state.option.isOptionModal);
 
   const setSameUsersUid = async () => {
-    const result = {};
-    let resultNum = 0;
+    const data = {};
+    const result = [];
+
     for (let i = 0; i < userMovieKeys.length; i++) {
       const users = await get(child(dbRef, `allMovies/${userMovieKeys[i]}`));
       if (users.exists()) {
@@ -48,17 +50,22 @@ export default function Home({ navigation }) {
         Object.keys(objUsers)
           .filter((key) => key !== userUid)
           .map((el) => {
-            if (result[el]) {
-              result[el]++;
+            if (data[el]) {
+              data[el]++;
             } else {
-              result[el] = 1;
-              resultNum++;
+              data[el] = 1;
             }
           });
       }
     }
+
+    for (let key in data) {
+      result.push([key, data[key]]);
+    }
+    result.sort((a, b) => b[1] - a[1]);
+
     dispatch(setSameUserList(result));
-    if (!resultNum) setIsLoading(false);
+    if (!result.length) setIsLoading(false);
   };
 
   const getUserData = async (uid) => {
@@ -88,10 +95,11 @@ export default function Home({ navigation }) {
   const getSameUserData = async () => {
     setIsReScan(true);
     const data = [];
-    for (let key in sameUsers) {
-      if (Number(sameUsers[key]) >= count) {
-        const userDb = await get(child(dbRef, `userMovies/${key}`));
-        const userName = await get(child(dbRef, `users/${key}`));
+
+    for (let i = 0; i < sameUsers.length; i++) {
+      if (sameUsers[i][1] >= count) {
+        const userDb = await get(child(dbRef, `userMovies/${sameUsers[i][0]}`));
+        const userName = await get(child(dbRef, `users/${sameUsers[i][0]}`));
         if (userDb.exists()) {
           const movies = userDb.val();
           const arrMovies = Object.keys(movies).map((el) => movies[el]);
@@ -137,129 +145,144 @@ export default function Home({ navigation }) {
           <ActivityIndicator size="large" color="tomato" />
         </View>
       ) : (
-        <ScrollView
-          keyboardShouldPersistTaps={"handled"}
-          style={styles.scrollViewContainer}
-        >
-          {movies.length ? (
-            <>
-              <PosterList
-                name={userName}
-                favorites={movies}
-                isOnlyImg={false}
-                showOverview={showOverview}
-              />
-              <View
-                style={{
-                  marginTop: 10,
-                  alignItems: "center",
-                }}
-              >
-                <Text style={styles.recommendationList}>추천 목록 🗒</Text>
-              </View>
-              <View
-                style={[
-                  styles.centeredView,
-                  {
-                    marginBottom: 10,
-                  },
-                ]}
-              >
-                <Text
+        <>
+          <HamburgerButton />
+
+          <ScrollView
+            keyboardShouldPersistTaps={"handled"}
+            style={styles.scrollViewContainer}
+          >
+            {movies.length ? (
+              <>
+                <PosterList
+                  name={userName}
+                  favorites={movies}
+                  isOnlyImg={false}
+                  showOverview={showOverview}
+                />
+                <View
                   style={{
-                    color: "white",
-                    fontSize: 12,
-                    borderBottomWidth: 1,
-                    borderColor: "#ffffff",
+                    marginTop: 10,
+                    alignItems: "center",
                   }}
                 >
-                  {"최소 일치 개수"}
-                </Text>
-              </View>
-              <View style={[styles.centeredView, { flexDirection: "row" }]}>
-                <CountButton
-                  imageSrc={require("../assets/minus_icon.png")}
-                  btnFunc={() => counter("minus")}
-                />
-                <Text style={{ color: "#ffffff", fontSize: 30 }}>{count}</Text>
-                <CountButton
-                  imageSrc={require("../assets/plus_icon.png")}
-                  btnFunc={() => counter("plus")}
-                />
-                <TouchableOpacity
-                  style={styles.confirmButton}
-                  onPress={() => getSameUserData()}
+                  <Text style={styles.recommendationList}>추천 목록 🗒</Text>
+                </View>
+                <View
+                  style={[
+                    styles.centeredView,
+                    {
+                      marginBottom: 10,
+                    },
+                  ]}
                 >
-                  <Text style={{ color: "#ffffff" }}>{"확인"}</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          ) : (
-            <>
-              <View
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: 150,
-                }}
-              >
-                <Text
-                  style={{ color: "#9e9e9e", fontWeight: "bold", fontSize: 20 }}
-                >
-                  정보가 없습니다.
-                </Text>
-                <Text
-                  style={{ color: "#9e9e9e", fontWeight: "bold", fontSize: 20 }}
-                >
-                  Search 탭에서 영화를 담아보세요
-                </Text>
-              </View>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <TouchableOpacity
-                  style={styles.moveButton}
-                  onPress={() => {
-                    navigation.navigate("Search");
+                  <Text
+                    style={{
+                      color: "white",
+                      fontSize: 12,
+                      borderBottomWidth: 1,
+                      borderColor: "#ffffff",
+                    }}
+                  >
+                    {"최소 일치 개수"}
+                  </Text>
+                </View>
+                <View style={[styles.centeredView, { flexDirection: "row" }]}>
+                  <CountButton
+                    imageSrc={require("../assets/minus_icon.png")}
+                    btnFunc={() => counter("minus")}
+                  />
+                  <Text style={{ color: "#ffffff", fontSize: 30 }}>
+                    {count}
+                  </Text>
+                  <CountButton
+                    imageSrc={require("../assets/plus_icon.png")}
+                    btnFunc={() => counter("plus")}
+                  />
+                  <TouchableOpacity
+                    style={styles.confirmButton}
+                    onPress={() => getSameUserData()}
+                  >
+                    <Text style={{ color: "#ffffff" }}>{"확인"}</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <>
+                <View
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: 150,
                   }}
                 >
-                  <Text style={styles.moveButtonText}>이동하기</Text>
-                </TouchableOpacity>
+                  <Text
+                    style={{
+                      color: "#9e9e9e",
+                      fontWeight: "bold",
+                      fontSize: 20,
+                    }}
+                  >
+                    정보가 없습니다.
+                  </Text>
+                  <Text
+                    style={{
+                      color: "#9e9e9e",
+                      fontWeight: "bold",
+                      fontSize: 20,
+                    }}
+                  >
+                    Search 탭에서 영화를 담아보세요
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <TouchableOpacity
+                    style={styles.moveButton}
+                    onPress={() => {
+                      navigation.navigate("Search");
+                    }}
+                  >
+                    <Text style={styles.moveButtonText}>이동하기</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+            {isReScan ? (
+              <View style={styles.centeredView}>
+                <ActivityIndicator size="large" color="tomato" />
               </View>
-            </>
-          )}
-          {isReScan ? (
-            <View style={styles.centeredView}>
-              <ActivityIndicator size="large" color="tomato" />
-            </View>
-          ) : (
-            sameUserMovies.map((data, idx) => (
-              <PosterList
-                key={idx}
-                name={data[0]}
-                favorites={data[1]}
-                isOnlyImg={false}
-                showOverview={showOverview}
-              />
-            ))
-          )}
-          {!sameUserMovies.length && !!movies.length && (
-            <View style={styles.centeredView}>
-              <Text style={{ color: "#ffffff", marginTop: 20, fontSize: 16 }}>
-                {"일치하는 유저가 없습니다"}
-              </Text>
-            </View>
-          )}
-          <OverviewModal
-            movie={selectMovie}
-            showOverview={showOverview}
-            state={isShowModal}
-          />
-        </ScrollView>
+            ) : (
+              sameUserMovies.map((data, idx) => (
+                <PosterList
+                  key={idx}
+                  name={data[0]}
+                  favorites={data[1]}
+                  isOnlyImg={false}
+                  showOverview={showOverview}
+                />
+              ))
+            )}
+            {!sameUserMovies.length && !!movies.length && (
+              <View style={styles.centeredView}>
+                <Text style={{ color: "#ffffff", marginTop: 20, fontSize: 16 }}>
+                  {"일치하는 유저가 없습니다"}
+                </Text>
+              </View>
+            )}
+            <OverviewModal
+              movie={selectMovie}
+              state={isShowModal}
+              hideModal={() => setIsShowModal(false)}
+              showModal={() => setIsShowModal(true)}
+            />
+          </ScrollView>
+        </>
       )}
       <View style={styles.MenuContainer}>
         {menus.map((menu) => (
@@ -293,7 +316,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 10,
     paddingBottom: 10,
-    marginLeft: 5,
     width: "90%",
     textAlign: "center",
     borderRadius: 10,

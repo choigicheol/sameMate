@@ -7,10 +7,11 @@ import {
   View,
   Image,
   ScrollView,
+  Pressable,
 } from "react-native";
 import OverFlowText from "./OverFlowText";
 
-export function OverviewModal({ movie, showOverview, state }) {
+export function OverviewModal({ movie, state, hideModal, showModal }) {
   const category = {
     title: "제목 : ",
     release_date: "개봉 : ",
@@ -21,24 +22,27 @@ export function OverviewModal({ movie, showOverview, state }) {
   return (
     <Modal
       animationType="fade"
-      transparent
+      transparent={true}
       visible={state}
       onRequestClose={() => {
-        showOverview();
+        hideModal();
       }}
     >
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
+      <Pressable style={styles.centeredView} onPressIn={() => hideModal()}>
+        <Pressable style={styles.modalView}>
           <View
             style={{
               width: "100%",
               alignItems: "flex-end",
             }}
+            onPress={() => {
+              console.log("!!!");
+            }}
           >
             <TouchableOpacity
               style={[styles.closeButton]}
               onPress={() => {
-                showOverview();
+                hideModal();
               }}
             >
               <Text style={{ color: "#ffffff", fontWeight: "bold" }}>닫기</Text>
@@ -60,21 +64,25 @@ export function OverviewModal({ movie, showOverview, state }) {
             />
           )}
           <ScrollView>
-            {arrCategories.map((cate, idx) => {
-              return (
-                <OverFlowText
-                  category={category[cate]}
-                  text={movie[cate]}
-                  style={styles.modalText}
-                  key={idx}
-                  name={cate}
-                ></OverFlowText>
-              );
-            })}
-            <Text style={styles.modalText}>{`줄거리 : ${movie.overview}`}</Text>
+            <View onStartShouldSetResponder={() => true}>
+              {arrCategories.map((cate, idx) => {
+                return (
+                  <OverFlowText
+                    category={category[cate]}
+                    text={movie[cate]}
+                    style={styles.modalText}
+                    key={idx}
+                    name={cate}
+                  ></OverFlowText>
+                );
+              })}
+              <Text
+                style={styles.modalText}
+              >{`줄거리 : ${movie.overview}`}</Text>
+            </View>
           </ScrollView>
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }
@@ -82,7 +90,7 @@ export function OverviewModal({ movie, showOverview, state }) {
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
-    marginTop: 50,
+    paddingTop: 50,
     alignItems: "center",
   },
 
@@ -93,7 +101,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     opacity: 0.9,
-    alignItems: "center",
     paddingTop: 0,
   },
   closeButton: {

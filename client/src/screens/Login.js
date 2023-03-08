@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Keyboard,
   TouchableWithoutFeedback,
-  Image,
 } from "react-native";
 
 import { windowWidth, windowHeight } from "../util/WH";
@@ -17,13 +16,12 @@ import {
   GoogleAuthProvider,
   signInWithCredential,
   onAuthStateChanged,
-  signOut,
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { setUser } from "../redux/slice/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { get, ref, update, child } from "firebase/database";
-import { db } from "../../firebaseConfig";
+import { db } from "../../firebaseConfig.js";
 import {
   GOOGLE_CLIENT_ID,
   ANDROID_GOOGLE_CLIENT_ID,
@@ -31,7 +29,6 @@ import {
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { GetHash } from "../util/Functions";
-import { useFocusEffect } from "@react-navigation/native";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -40,13 +37,12 @@ export default function Login({ navigation }) {
   const [password, setPassword] = useState("");
   const [isEnter, setIsEnter] = useState(false);
   const [isWarning, setIsWarning] = useState(false);
-  const isLogin = useSelector((state) => state.user.isLogin);
 
   const dispatch = useDispatch();
 
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    expoClientId: GOOGLE_CLIENT_ID,
-    androidClientId: ANDROID_GOOGLE_CLIENT_ID,
+    expoClientId: process.env.GOOGLE_CLIENT_ID,
+    androidClientId: process.env.ANDROID_GOOGLE_CLIENT_ID,
   });
 
   const openGoogleLogin = () => {
@@ -176,32 +172,31 @@ export default function Login({ navigation }) {
                 )}
               </View>
               <TouchableOpacity
-                style={styles.loginButton}
+                style={styles.buttonContainer}
                 onPress={() => {
                   userSignIn();
                 }}
               >
-                <Text style={styles.loginButtonText}>Login</Text>
+                <Text style={styles.buttonText}>Login</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.googleLoginButton}
+                style={styles.buttonContainer}
+                onPress={() => {
+                  navigation.navigate("Signup");
+                }}
+              >
+                <Text style={styles.buttonText}>SignUp</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.buttonContainer, styles.googleLoginButton]}
                 disabled={!request}
                 onPress={() => {
                   openGoogleLogin();
                 }}
               >
-                <Image
-                  style={{ width: "100%", height: "100%" }}
-                  source={require("../assets/googleButton.png")}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.signupButton}
-                onPress={() => {
-                  navigation.navigate("Signup");
-                }}
-              >
-                <Text style={styles.signupButtonText}>SignUp</Text>
+                <Text style={[styles.buttonText, styles.googleButtonText]}>
+                  Google 계정으로 로그인
+                </Text>
               </TouchableOpacity>
             </View>
           </>
@@ -266,40 +261,28 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  loginButton: {
+  buttonContainer: {
     backgroundColor: "#32AAFF",
     width: windowWidth - 60,
-    height: 50,
+    height: 40,
     borderRadius: 5,
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 30,
   },
   googleLoginButton: {
-    marginTop: 25,
-    width: (windowWidth - 60) / 2,
-    height: 40,
-    borderRadius: 5,
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: null,
   },
-  signupButton: {
-    marginTop: 30,
-    width: (windowWidth - 60) / 2,
-    height: 40,
-    borderRadius: 5,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loginButtonText: {
+  buttonText: {
     fontSize: 20,
     color: "white",
     fontWeight: "bold",
   },
-  signupButtonText: {
-    fontSize: 20,
+  googleButtonText: {
+    fontSize: 16,
     color: "#32AAFF",
-    fontWeight: "bold",
   },
+
   backgroundBlack: {
     backgroundColor: "#000000",
   },

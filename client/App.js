@@ -8,29 +8,6 @@ import { store } from "./src/redux/store/store";
 import { Provider } from "react-redux";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import {
-  API_KEY,
-  AUTH_DOMAIN,
-  PROJECT_ID,
-  STORAGE_BUCKET,
-  MESSAGING_SENDER_ID,
-  APP_ID,
-  MEASUREMENT_ID,
-  DATABASE_URL,
-} from "react-native-dotenv";
-
-import { initializeApp } from "firebase/app";
-
-initializeApp({
-  apiKey: API_KEY,
-  authDomain: AUTH_DOMAIN,
-  projectId: PROJECT_ID,
-  storageBucket: STORAGE_BUCKET,
-  messagingSenderId: MESSAGING_SENDER_ID,
-  appId: APP_ID,
-  measurementId: MEASUREMENT_ID,
-  databaseURL: DATABASE_URL,
-});
 
 const queryClient = new QueryClient();
 

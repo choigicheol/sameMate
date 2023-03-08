@@ -8,15 +8,12 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import MenuTap from "../components/MenuTap";
-import { menus } from "../../dummy/data";
 import PosterList from "../components/PosterList";
-import { db } from "../../firebaseConfig";
+import { db } from "../../firebaseConfig.js";
 import { ref, child, get } from "firebase/database";
 import { useSelector, useDispatch } from "react-redux";
 import { setMovie, setSameUserData } from "../redux/slice/movieSlice";
 import { setSameUserList } from "../redux/slice/userSlice";
-import { windowHeight } from "../util/WH";
 import { OverviewModal } from "../components/OverviewModal";
 import { useFocusEffect } from "@react-navigation/native";
 import CountButton from "../components/CountButton";
@@ -35,16 +32,18 @@ export default function Home({ navigation }) {
   const [isShowModal, setIsShowModal] = useState(false);
   const [userMovieKeys, setUserMovieKeys] = useState([]);
   const [count, setCount] = useState(1);
-  const [isReScan, setIsReScan] = useState(false);
+  const [isReScan, setIsReScan] = useState(true);
   const [sameDataNum, setSameDataNum] = useState(10);
   const isOptionModal = useSelector((state) => state.option.isOptionModal);
 
   const setSameUsersUid = async () => {
+    dispatch(setSameUserList([]));
     const data = {};
     const result = [];
 
     for (let i = 0; i < userMovieKeys.length; i++) {
       const users = await get(child(dbRef, `allMovies/${userMovieKeys[i]}`));
+
       if (users.exists()) {
         const objUsers = users.val();
         Object.keys(objUsers)
@@ -65,10 +64,12 @@ export default function Home({ navigation }) {
     result.sort((a, b) => b[1] - a[1]);
 
     dispatch(setSameUserList(result));
+
     if (!result.length) setIsLoading(false);
   };
 
   const getUserData = async (uid) => {
+    setUserMovieKeys([]);
     const result = await get(child(dbRef, `userMovies/${uid}`));
     const data = [];
     const keys = [];
@@ -79,15 +80,16 @@ export default function Home({ navigation }) {
         keys.push(key);
       }
       setUserMovieKeys(keys);
-      dispatch(setMovie(data));
     } else {
       setIsLoading(false);
     }
+    dispatch(setMovie(data));
   };
 
   useFocusEffect(
     React.useCallback(() => {
       getUserData(userUid);
+      console.log(userUid);
       setCount(1);
     }, [])
   );
@@ -115,12 +117,12 @@ export default function Home({ navigation }) {
   };
 
   useEffect(() => {
-    getSameUserData();
-  }, [sameUsers]);
+    setSameUsersUid();
+  }, [userMovieKeys, movies]);
 
   useEffect(() => {
-    setSameUsersUid();
-  }, [userMovieKeys]);
+    getSameUserData();
+  }, [sameUsers, movies]);
 
   const showOverview = (movie) => {
     if (movie) setSelectMovie(movie);
@@ -135,18 +137,12 @@ export default function Home({ navigation }) {
   return (
     <>
       {isLoading ? (
-        <View
-          style={{
-            backgroundColor: "#000000",
-            height: windowHeight - 74,
-            justifyContent: "center",
-          }}
-        >
+        <View style={styles.centeredView}>
           <ActivityIndicator size="large" color="tomato" />
         </View>
       ) : (
         <>
-          <HamburgerButton />
+          {/* <HamburgerButton /> */}
 
           <ScrollView
             keyboardShouldPersistTaps={"handled"}
@@ -254,7 +250,7 @@ export default function Home({ navigation }) {
               </>
             )}
             {isReScan ? (
-              <View style={styles.centeredView}>
+              <View style={{ width: "100%", height: "100%" }}>
                 <ActivityIndicator size="large" color="tomato" />
               </View>
             ) : (
@@ -284,11 +280,6 @@ export default function Home({ navigation }) {
           </ScrollView>
         </>
       )}
-      <View style={styles.MenuContainer}>
-        {menus.map((menu) => (
-          <MenuTap key={menu.id} title={menu.title} navigation={navigation} />
-        ))}
-      </View>
     </>
   );
 }
@@ -302,10 +293,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  MenuContainer: {
-    flexDirection: "row",
-    backgroundColor: "#000000",
   },
   recommendationList: {
     borderBottomWidth: 5,

@@ -8,14 +8,12 @@ import {
   TextInput,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { menus } from "../../dummy/data";
-import MenuTap from "../components/MenuTap";
 import { setName, userSliceReset } from "../redux/slice/userSlice";
 import { movieSliceReset } from "../redux/slice/movieSlice";
 import { getAuth, signOut } from "firebase/auth";
 import PosterList from "../components/PosterList";
 import { ref, update } from "firebase/database";
-import { db } from "../../firebaseConfig";
+import { db } from "../../firebaseConfig.js";
 
 export default function Mypage({ navigation }) {
   const dispatch = useDispatch();
@@ -177,11 +175,6 @@ export default function Mypage({ navigation }) {
             </Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.MenuContainer}>
-          {menus.map((menu) => (
-            <MenuTap key={menu.id} title={menu.title} navigation={navigation} />
-          ))}
-        </View>
       </View>
     </>
   );
@@ -195,10 +188,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingRight: 5,
     paddingLeft: 5,
-  },
-  MenuContainer: {
-    flexDirection: "row",
-    backgroundColor: "#000000",
   },
   userInfoTitle: {
     marginTop: 10,

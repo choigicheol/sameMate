@@ -8,12 +8,10 @@ import {
   Modal,
 } from "react-native";
 import SearchBar from "../components/SearchBar";
-import { menus } from "../../dummy/data";
-import MenuTap from "../components/MenuTap";
 import axios from "axios";
 import SearchResult from "../components/SearchResult";
-import { TMDB_API_KEY } from "react-native-dotenv";
-import { db } from "../../firebaseConfig";
+import { TMDB_API_KEY, KAKAO_SEARCH_API_KEY } from "react-native-dotenv";
+import { db } from "../../firebaseConfig.js";
 import { ref, update } from "firebase/database";
 import { useDispatch, useSelector } from "react-redux";
 import { addMovie } from "../redux/slice/movieSlice";
@@ -36,25 +34,42 @@ export default function Search({ navigation }) {
   const dbRef = ref(db);
   const auth = getAuth();
   const [updates, setUpdates] = useState({});
+  const searchType = useSelector((state) => state.user.searchType);
+  const [searchBooks, setSearchBooks] = useState([]);
 
-  const getMovies = async (word) => {
+  const getSearchData = async (word) => {
     if (word.length > 1) {
       setIsSearching(true);
-      const result = await axios.get(
-        `https://api.themoviedb.org/3/search/${searchCategory}?api_key=${TMDB_API_KEY}&page=1&query=${word}&language=ko-KR&include_adult=false`
-      );
+      if (searchType === "movie") {
+        const result = await axios.get(
+          `https://api.themoviedb.org/3/search/${searchCategory}?api_key=${process.env.TMDB_API_KEY}&page=1&query=${word}&language=ko-KR&include_adult=false`
+        );
 
-      if (result.data) {
-        if (searchCategory === "tv") {
-          result.data.results.map(
-            (tvProgram) => (tvProgram.title = tvProgram.name)
-          );
+        if (result.data) {
+          if (searchCategory === "tv") {
+            result.data.results.map(
+              (tvProgram) => (tvProgram.title = tvProgram.name)
+            );
+          }
+          setSearchMovies(result.data.results);
+          setTotalResults(result.data.total_results);
         }
-        setSearchMovies(result.data.results);
-        setSearchWord(word);
-        setTotalResults(result.data.total_results);
+      } else if (searchType === "book") {
+        const result = await axios.get(
+          `https://dapi.kakao.com/v3/search/book?sort=accuracy&query=${word}`,
+          {
+            headers: {
+              Authorization: `KakaoAK ${process.env.KAKAO_SEARCH_API_KEY}`,
+            },
+          }
+        );
+        if (result.data) {
+          setSearchBooks(result.data.documents);
+          setTotalResults(result.data.meta.total_count);
+        }
       }
 
+      setSearchWord(word);
       setPage(1);
       setIsSearching(false);
     }
@@ -68,15 +83,24 @@ export default function Search({ navigation }) {
 
   const getNextPage = async (word) => {
     if (word.length > 1) {
-      const result = await axios.get(
-        `https://api.themoviedb.org/3/search/${searchCategory}?api_key=${TMDB_API_KEY}&page=${
-          page + 1
-        }&query=${word}&language=ko-KR&include_adult=false`
-      );
-      if (result.data) {
-        const newData = [...searchMovies, ...result.data.results];
-        setSearchMovies(newData);
-        setPage(page + 1);
+      if (searchType === "movie") {
+        const result = await axios.get(
+          `https://api.themoviedb.org/3/search/${searchCategory}?api_key=${
+            process.env.TMDB_API_KEY
+          }&page=${page + 1}&query=${word}&language=ko-KR&include_adult=false`
+        );
+        if (result.data) {
+          const newData = [...searchMovies, ...result.data.results];
+          setSearchMovies(newData);
+          setPage(page + 1);
+        }
+      } else if (searchType === "book") {
+        const result = await axios.get(
+          `https://dapi.kakao.com/v3/search/book?sort=accuracy&page=${
+            page + 1
+          }&query=${word}`,
+          { headers: { Authorization: process.env.KAKAO_SEARCH_API_KEY } }
+        );
       }
     }
   };
@@ -151,7 +175,7 @@ export default function Search({ navigation }) {
 
       <View style={styles.container}>
         <View style={styles.marginTB10}>
-          <SearchBar getMovies={getMovies} />
+          <SearchBar getSearchData={getSearchData} />
         </View>
         <View style={styles.resultCountBox}>
           <Text style={styles.resultCount}>검색 결과</Text>
@@ -173,11 +197,6 @@ export default function Search({ navigation }) {
           onEndReached={getData}
           onEndReachedThreshold={1}
         />
-      </View>
-      <View style={styles.MenuContainer}>
-        {menus.map((menu) => (
-          <MenuTap key={menu.id} title={menu.title} navigation={navigation} />
-        ))}
       </View>
     </>
   );
@@ -206,11 +225,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontWeight: "bold",
     color: "#2e2e2e",
-  },
-
-  MenuContainer: {
-    flexDirection: "row",
-    backgroundColor: "#000000",
   },
   number: {
     color: "#32AAFF",

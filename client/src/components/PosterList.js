@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useRef } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
 import Poster from "./Poster";
 import { windowWidth } from "../util/WH";
+import { useEffect } from "react";
 
 export default function PosterList({
   name,
@@ -11,6 +12,12 @@ export default function PosterList({
   isEditMode,
   showOverview,
 }) {
+  const scrollRef = useRef();
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ x: 0, y: 0, animated: true });
+  }, [isEditMode]);
+
   return (
     <>
       <View
@@ -27,6 +34,7 @@ export default function PosterList({
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.favoriteListContainer}
+          ref={scrollRef}
         >
           {favorites.length ? (
             favorites.map((favorite, idx) => (

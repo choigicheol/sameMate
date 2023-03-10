@@ -41,8 +41,8 @@ export default function Login({ navigation }) {
   const dispatch = useDispatch();
 
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    expoClientId: process.env.GOOGLE_CLIENT_ID,
-    androidClientId: process.env.ANDROID_GOOGLE_CLIENT_ID,
+    expoClientId: GOOGLE_CLIENT_ID,
+    androidClientId: ANDROID_GOOGLE_CLIENT_ID,
   });
 
   const openGoogleLogin = () => {
@@ -94,7 +94,7 @@ export default function Login({ navigation }) {
         setUserInfo(uid, displayName);
         setIsEnter(false);
         navigation.reset({
-          routes: [{ name: "Home" }],
+          routes: [{ name: "Root" }],
         });
       }
     }
@@ -120,7 +120,7 @@ export default function Login({ navigation }) {
           .then(() => {
             setIsEnter(false);
             navigation.reset({
-              routes: [{ name: "Home" }],
+              routes: [{ name: "Root" }],
             });
           });
       })
